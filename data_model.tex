@@ -1,0 +1,46 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+
+\title{CSC309 Data Model}
+\author{Kyle}
+\date{October 2024}
+
+\begin{document}
+
+\maketitle
+
+\section*{Schema}
+
+\begin{itemize}
+\item
+User(\underline{uID}, username, password, name, email, avatar, phoneNumber)
+
+\item 
+CodeTemplate(\underline{ctID}, uID, title, explanation, tags, code, forkID, private)
+The forkID is the ctID of the original template, null if the template is not forked.
+\textbf{Integrity Constraints:}
+\begin{itemize}
+\item CodeTemplate[uID] $\subseteq$ User[uID]
+\item CodeTemplate[forkID] $\subseteq$ CodeTemplate[ctID]
+\end{itemize}
+
+\item 
+Blog(\underline{bID}, uID, title, description, tags, links, flags)
+\textbf{Integrity Constraints:}
+\begin{itemize}
+\item Blog[uID] $\subseteq$ User[uID]
+\end{itemize}
+
+\item
+Comment(\underline{cID}, bID, uID, up, down, content)
+\textbf{Integrity Constraints:}
+\begin{itemize}
+\item Comment[uID] $\subseteq$ User[uID]
+\item Comment[bID] $\subseteq$ Blog[bID]
+\end{itemize}
+
+
+
+
+\end{itemize}
+\end{document}
