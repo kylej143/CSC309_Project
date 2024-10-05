@@ -13,7 +13,7 @@
 
 \begin{itemize}
 \item
-User(\underline{uID}, username, password, name, email, avatar, phoneNumber)
+User(\underline{uID}, username, password, name, email, avatar, phoneNumber, isAdmin)
 
 \item 
 CodeTemplate(\underline{ctID}, uID, title, explanation, tags, code, forkID, private)
@@ -29,10 +29,11 @@ Blog(\underline{bID}, uID, title, description, tags, links, flags)
 \textbf{Integrity Constraints:}
 \begin{itemize}
 \item Blog[uID] $\subseteq$ User[uID]
+\item Blog[links] $\subseteq$ CodeTemplate[ctID]
 \end{itemize}
 
 \item
-Comment(\underline{cID}, bID, uID, up, down, content)
+Comment(\underline{cID}, bID, uID, up, down, content, flags)
 \textbf{Integrity Constraints:}
 \begin{itemize}
 \item Comment[uID] $\subseteq$ User[uID]
