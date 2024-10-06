@@ -2,7 +2,7 @@
 
 By: Kyle Joung, Jessica Song Li, Woojin Jang
 
-# Required installs on ubunto:
+# Required installs on ubuntu:
 sudo apt update
 
 sudo apt install nodejs
