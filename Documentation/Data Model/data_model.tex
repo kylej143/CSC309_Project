@@ -13,10 +13,10 @@
 
 \begin{itemize}
 \item
-User(\underline{uID}, username, password, name, email, avatar, phoneNumber, isAdmin)
+User(\underline{uID}, username, password, name, email, avatar, phoneNumber)
 
-\item 
-CodeTemplate(\underline{ctID}, uID, title, explanation, tags, code, forkID, private)
+\item
+CodeTemplate(\underline{ctID}, uID, title, explanation, code, forkID, private)
 The forkID is the ctID of the original template, null if the template is not forked.
 \textbf{Integrity Constraints:}
 \begin{itemize}
@@ -24,12 +24,11 @@ The forkID is the ctID of the original template, null if the template is not for
 \item CodeTemplate[forkID] $\subseteq$ CodeTemplate[ctID]
 \end{itemize}
 
-\item 
-Blog(\underline{bID}, uID, title, description, tags, links, flags)
+\item
+Blog(\underline{bID}, uID, title, content, up, down, flags)
 \textbf{Integrity Constraints:}
 \begin{itemize}
 \item Blog[uID] $\subseteq$ User[uID]
-\item Blog[links] $\subseteq$ CodeTemplate[ctID]
 \end{itemize}
 
 \item
@@ -40,7 +39,21 @@ Comment(\underline{cID}, bID, uID, up, down, content, flags)
 \item Comment[bID] $\subseteq$ Blog[bID]
 \end{itemize}
 
+\item
+Tag(\underline{tID}, bID, ctID, tag)
+\textbf{Integrity Constraints:}
+\begin{itemize}
+\item Tag[ctID] $\subseteq$ CodeTemplate[ctID]
+\item Tag[bID] $\subseteq$ Blog[bID]
+\end{itemize}
 
+\item
+Link(\underline{tID}, bID, ctID)
+\textbf{Integrity Constraints:}
+\begin{itemize}
+\item Link[ctID] $\subseteq$ CodeTemplate[ctID]
+\item Link[bID] $\subseteq$ Blog[bID]
+\end{itemize}
 
 
 \end{itemize}
