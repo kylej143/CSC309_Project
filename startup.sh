@@ -1,0 +1,1 @@
+npm i prisma @prisma/client @prisma/studio
