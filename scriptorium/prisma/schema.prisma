@@ -33,7 +33,7 @@ model CodeTemplate {
   explanation String?
   code        String
   private     Boolean @default(false)
-  forkID      Int
+  forkID      Int?
 
   user   User @relation(fields: [userID], references: [id])
   userID Int
