@@ -2,6 +2,13 @@
 
 By: Kyle Joung, Jessica Song Li, Woojin Jang
 
+# What To Do?
+On terminal:
+* cd scriptorium
+* ../startup.sh
+* ../run.sh
+
+
 # Required installs on ubuntu:
 sudo apt update
 
