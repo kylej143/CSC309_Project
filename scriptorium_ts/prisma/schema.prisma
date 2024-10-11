@@ -1,0 +1,88 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id          Int    @id @default(autoincrement())
+  username    String @unique
+  password    String
+  name        String
+  email       String @unique
+  avatar      Int    @default(0)
+  phoneNumber Int?
+
+  CodeTemplate CodeTemplate[]
+  Blog         Blog[]
+  Comment      Comment[]
+}
+
+model CodeTemplate {
+  id          Int     @id @default(autoincrement())
+  title       String
+  explanation String?
+  code        String
+  private     Boolean @default(false)
+  forkID      Int?
+
+  user   User @relation(fields: [userID], references: [id])
+  userID Int
+
+  Tag  Tag[]
+  Link Link[]
+}
+
+model Blog {
+  id      Int    @id @default(autoincrement())
+  title   String
+  content String
+  flags   Int    @default(0)
+  up      Int    @default(0)
+  down    Int    @default(0)
+
+  user   User @relation(fields: [userID], references: [id])
+  userID Int
+
+  Comment Comment[]
+  Tag     Tag[]
+  Link    Link[]
+}
+
+model Comment {
+  id      Int    @id @default(autoincrement())
+  content String
+  flags   Int    @default(0)
+  up      Int    @default(0)
+  down    Int    @default(0)
+  user    User   @relation(fields: [userID], references: [id])
+  userID  Int
+  blog    Blog   @relation(fields: [blogID], references: [id])
+  blogID  Int
+}
+
+model Tag {
+  id      Int          @id @default(autoincrement())
+  tag     String       @unique
+  blog    Blog         @relation(fields: [blogID], references: [id])
+  blogID  Int
+  cTemp   CodeTemplate @relation(fields: [cTempID], references: [id])
+  cTempID Int
+}
+
+model Link {
+  id      Int          @id @default(autoincrement())
+  blog    Blog         @relation(fields: [blogID], references: [id])
+  blogID  Int
+  cTemp   CodeTemplate @relation(fields: [cTempID], references: [id])
+  cTempID Int
+}
