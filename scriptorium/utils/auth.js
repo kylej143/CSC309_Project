@@ -1,11 +1,11 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-const BCRYPT_SALT_ROUNDS = 10
-const JWT_SECRET = "asdlfjqif;ql;k1212j1456hjk"
-const REFRESH_SECRET = "asjd;asasadsal;dfj;asqadsasd"
-const JWT_EXPIRES_IN = "20m"
-const JWT_REFRESH_EXPIRES_IN = "10h"
+const BCRYPT_SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS)
+const JWT_SECRET = process.env.JWT_SECRET
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN
+const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN
 
 export async function hashPassword(password) {
     return await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
@@ -22,7 +22,7 @@ export function generateToken(obj) {
 }
 
 export function generateRefreshToken(obj) {
-    return jwt.sign(obj, REFRESH_SECRET, {
+    return jwt.sign(obj, JWT_REFRESH_SECRET, {
         expiresIn: JWT_REFRESH_EXPIRES_IN,
     });
 }
@@ -47,7 +47,7 @@ export function verifyRefreshToken(token) {
     }
 
     try {
-        return jwt.verify(token, REFRESH_SECRET);
+        return jwt.verify(token, JWT_REFRESH_SECRET);
     } catch (err) {
         return null;
     }
