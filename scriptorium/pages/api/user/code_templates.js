@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { verifyToken } from '@/utils/auth'; 
 
 const prisma = new PrismaClient();
+//connectOrCreate cite online source
 
 export default async function handler(req, res){
     const token = req.headers.authorization;
@@ -15,8 +16,8 @@ export default async function handler(req, res){
             try{
                 const code_template1 = await prisma.codeTemplate.create({
                     data:{title, explanation, code, user: {connect:{id: userV.id}}, Tag:{
-                        connectOrCreate: Tag.map((t) => ({where: {tag: t}, create: {tag: t}}))}   //connectOrCreate cite online source
-                    },
+                        connectOrCreate: Tag.map((t) => ({where: {tag: t}, create: {tag: t}}))}  
+                    }
                 });
                 return res.status(201).json(code_template1);
             }catch(error){
@@ -59,7 +60,7 @@ export default async function handler(req, res){
                 const code_template3 = await prisma.codeTemplate.update({
                     where: {id: parseInt(id)}, 
                     data: {title, explanation, code, Tag:{set: [], 
-                        connectOrCreate: Tag.map((t) => ({where: {tag: t}, create: {tag: t}}))} //connectOrCreate cite online source
+                        connectOrCreate: Tag.map((t) => ({where: {tag: t}, create: {tag: t}}))} 
                     },
                 });
                 return res.status(200).json(code_template3);
@@ -79,4 +80,28 @@ export default async function handler(req, res){
             return res.status(401).json({error:'the user has invalid token'});
         }
     } 
+
+    // 4. use, fork
+    if(req.query.fork && req.method === 'POST'){
+        const {id} = req.query;
+      
+        if(userV){
+            const {title, explanation, code, Tag} = req.body;
+            
+            try{
+                const code_template4 = await prisma.codeTemplate.create({
+                    data: {title, explanation, code, forkID: parseInt(id), user: {connect: {id: userV.id}}, Tag: {
+                        connectOrCreate: Tag.map((t) => ({where: {tag: t}, create: {tag: t}}))}
+                    }
+                });
+                return res.status(201).json(code_template4);
+            }catch(error){
+                return res.status(500).json({error:'error'});
+            }
+        }else{
+            return res.status(401).json({error:'the visitor has invalid token'});
+        }
+    }
+
+    // 5. search(visitor)
 }
