@@ -2,6 +2,7 @@
 CREATE TABLE "User" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "username" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "avatar" INTEGER NOT NULL DEFAULT 0,
@@ -15,7 +16,7 @@ CREATE TABLE "CodeTemplate" (
     "explanation" TEXT,
     "code" TEXT NOT NULL,
     "private" BOOLEAN NOT NULL DEFAULT false,
-    "forkID" INTEGER NOT NULL,
+    "forkID" INTEGER,
     "userID" INTEGER NOT NULL,
     CONSTRAINT "CodeTemplate_userID_fkey" FOREIGN KEY ("userID") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
