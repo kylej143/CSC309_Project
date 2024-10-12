@@ -2,7 +2,6 @@ import { PrismaClient } from '@prisma/client';
 import { verifyToken } from '@/utils/auth'; 
 
 const prisma = new PrismaClient();
-//connectOrCreate cite online source
 
 export default async function handler(req, res){
     const token = req.headers.authorization;
@@ -104,4 +103,30 @@ export default async function handler(req, res){
     }
 
     // 5. search(visitor)
+    if(req.method === 'GET'){
+        const {title, tags, content} = req.query; 
+    
+        let f = {private: false};
+    
+        if(title){
+            f.title = {contains: title, mode: 'insensitive'};
+        }
+        if(tags){
+            const a = tags.split(',');
+            f.Tag = {some: {tag: {in: a}}};
+        }
+        if(content){
+            f.OR = [{code: {contains: content, mode: 'insensitive'}}, {explanation: {contains: content, mode: 'insensitive'}}];
+        }
+    
+        try{
+            const code_template5 = await prisma.codeTemplate.findMany({
+                where: f, include: {Tag: true, user: true}});
+                return res.status(200).json(code_template5); 
+        }catch(error){
+            return res.status(500).json({error:'error'});
+        }
+    }else{
+        return res.status(405).json({error: 'error'});
+    }
 }
