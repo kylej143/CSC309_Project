@@ -27,25 +27,42 @@ export default async function handler(req, res){
         }
     }
 
-    // 2. view, search
+    // 2. view, search + 5. search(visitor)
     if(req.method === 'GET'){
-        if(userV){
-            const {title, Tag} = req.query;
-      
-            try{
-                const code_template2 = await prisma.codeTemplate.findMany({where:
-                    {
-                        userId: userV.id,  
-                        title: title ? {contains: title, mode: 'insensitive'}: undefined,  
-                        Tag: Tag ? {some:{tag: {in: Tag.split(',')}}}: undefined
-                    },include: {user: true, Tag: true}});
-                    return res.status(200).json(code_template2);
-            }catch(error){
-                return res.status(500).json({error:'error'});
-            }
+        const {title, tags, content} = req.query;
+        
+        let filter = {};
+    
+        if(!userV){
+            filter.private = false; 
         }else{
-            return res.status(401).json({error:'the user has invalid token'});
+            filter.userId = userV.id; 
         }
+    
+        if(title){
+            filter.title = {contains: title, mode: 'insensitive'};
+        }
+        if(tags){
+            const a = tags.split(',').map(t => t.trim()).filter(Boolean);  
+            if(a.length){
+                filter.Tag = {some: {tag: {in: a}}};
+            }
+        }
+        if(content){
+            filter.OR = [
+                {code: {contains: content, mode: 'insensitive'}},
+                {explanation: {contains: content, mode: 'insensitive'}}
+            ];
+        }
+    
+        try {
+            const code_template2 = await prisma.codeTemplate.findMany({where: filter, include: {Tag: true, user: true}});
+            return res.status(200).json(code_template2);
+        }catch(error){
+            return res.status(500).json({error:'error'});
+        }
+    }else{
+        return res.status(405).json({error:'error'});
     }
 
     // 3. edit, delete
@@ -100,33 +117,5 @@ export default async function handler(req, res){
         }else{
             return res.status(401).json({error:'the visitor has invalid token'});
         }
-    }
-
-    // 5. search(visitor)
-    if(req.method === 'GET'){
-        const {title, tags, content} = req.query; 
-    
-        let f = {private: false};
-    
-        if(title){
-            f.title = {contains: title, mode: 'insensitive'};
-        }
-        if(tags){
-            const a = tags.split(',');
-            f.Tag = {some: {tag: {in: a}}};
-        }
-        if(content){
-            f.OR = [{code: {contains: content, mode: 'insensitive'}}, {explanation: {contains: content, mode: 'insensitive'}}];
-        }
-    
-        try{
-            const code_template5 = await prisma.codeTemplate.findMany({
-                where: f, include: {Tag: true, user: true}});
-                return res.status(200).json(code_template5); 
-        }catch(error){
-            return res.status(500).json({error:'error'});
-        }
-    }else{
-        return res.status(405).json({error: 'error'});
     }
 }
