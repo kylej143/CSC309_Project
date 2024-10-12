@@ -61,8 +61,6 @@ export default async function handler(req, res){
         }catch(error){
             return res.status(500).json({error:'error'});
         }
-    }else{
-        return res.status(405).json({error:'error'});
     }
 
     // 3. edit, delete
