@@ -1,11 +1,10 @@
 import { PrismaClient } from '@prisma/client';
-import { verifyToken } from '@/utils/auth'; 
+import token_handler from '@/pages/api/user/protected';
 
 const prisma = new PrismaClient();
 
 export default async function handler(req, res){
-    const token = req.headers.authorization;
-    const userV = verifyToken(token);  
+    const userV = token_handler(req, res);
 
     // 1. save
     if(req.method === 'POST'){
@@ -20,10 +19,10 @@ export default async function handler(req, res){
                 });
                 return res.status(201).json(code_template1);
             }catch(error){
-                return res.status(500).json({error:'error'});
+                return res.status(503).json({error:'error'});
             }
         }else{
-            return res.status(401).json({error:'the user has invalid token'});
+            return res.status(403).json({error: "403 Forbidden"});
         }
     }
 
@@ -59,7 +58,7 @@ export default async function handler(req, res){
             const code_template2 = await prisma.codeTemplate.findMany({where: filter, include: {Tag: true, user: true}});
             return res.status(200).json(code_template2);
         }catch(error){
-            return res.status(500).json({error:'error'});
+            return res.status(503).json({error:'error'});
         }
     }
 
@@ -79,10 +78,10 @@ export default async function handler(req, res){
                 });
                 return res.status(200).json(code_template3);
             }catch(error){
-                return res.status(500).json({error:'error'});
+                return res.status(503).json({error:'error'});
             }
         }else{
-            return res.status(401).json({error:'the user has invalid token'});
+            return res.status(403).json({error: "403 Forbidden"});
         }
     }else if(req.method === 'DELETE'){
         const {id} = req.query;
@@ -91,7 +90,7 @@ export default async function handler(req, res){
             await prisma.codeTemplate.delete({where:{id: parseInt(id)}});
             return res.status(204).end();
         }else{
-            return res.status(401).json({error:'the user has invalid token'});
+            return res.status(403).json({error: "403 Forbidden"});
         }
     } 
 
@@ -110,10 +109,10 @@ export default async function handler(req, res){
                 });
                 return res.status(201).json(code_template4);
             }catch(error){
-                return res.status(500).json({error:'error'});
+                return res.status(503).json({error:'error'});
             }
         }else{
-            return res.status(401).json({error:'the visitor has invalid token'});
+            return res.status(403).json({error: "403 Forbidden"});
         }
     }
 }
