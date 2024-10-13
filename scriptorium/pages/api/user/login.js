@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client"
+import prisma from "@/utils/db"
 import {comparePassword, generateRefreshToken, generateToken} from "@/utils/auth";
-
-const prisma = new PrismaClient()
 
 
 export default async function handler(req, res) {
