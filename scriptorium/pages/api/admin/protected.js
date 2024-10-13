@@ -2,7 +2,7 @@ import prisma from "@/utils/db"
 import { verifyToken } from "@/utils/auth";
 
 
-export default async function handler(req, res) {
+export default async function token_handler(req, res) {
 
     if (req.method === "GET") {
         const Authorization = req.headers.authorization;
