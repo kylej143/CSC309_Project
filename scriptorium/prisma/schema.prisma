@@ -70,6 +70,15 @@ model Comment {
   blogID  Int
 }
 
+model ContentReport{
+  id      Int    @id @default(autoincrement())
+  reason    String
+  user    User   @relation(fields: [userID], references: [id])
+  userID  Int
+  blogID  Int
+  commentID Int
+}
+
 model Tag {
   id      Int          @id @default(autoincrement())
   tag     String       @unique
