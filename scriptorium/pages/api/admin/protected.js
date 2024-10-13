@@ -6,17 +6,13 @@ export default async function token_handler(req, res) {
     const Authorization = req.headers.authorization;
 
     if (!Authorization) {
-        return res.status(401).json({
-            error: "no token",
-        });
+        return false
     }
 
     let userV = await verifyToken(Authorization)
 
     if (!userV) {
-        return res.status(401).json({
-            error: "invalid token",
-        });
+        return false
     }
 
     const {userId} = userV
@@ -26,9 +22,7 @@ export default async function token_handler(req, res) {
         },
     });
     if (!user) {
-        return res.status(401).json({
-            error: "invalid token",
-        });
+        return false
     }
 
     const {role} = user
