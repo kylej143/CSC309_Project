@@ -38,8 +38,14 @@ model CodeTemplate {
   user   User @relation(fields: [userID], references: [id])
   userID Int
 
-  Tag  Tag[]
-  Link Link[]
+  tags  CodeTemplateTag[] // a code template can have many tags
+  blogs Blog[] // a code template can be linked to many blogs
+}
+
+model CodeTemplateTag {
+  id        Int            @id @default(autoincrement())
+  tag       String         @unique
+  templates CodeTemplate[] // a tag can have many code templates
 }
 
 model Blog {
@@ -53,9 +59,15 @@ model Blog {
   user   User @relation(fields: [userID], references: [id])
   userID Int
 
-  Comment Comment[]
-  Tag     Tag[]
-  Link    Link[]
+  comments  Comment[] // a blog can have many comments
+  tags      BlogTag[] // a blog can have many tags
+  templates CodeTemplate[] // a blog can link to many code templates
+}
+
+model BlogTag {
+  id    Int    @id @default(autoincrement())
+  tag   String @unique
+  blogs Blog[] // a tag can link to many blogs
 }
 
 model Comment {
@@ -68,21 +80,4 @@ model Comment {
   userID  Int
   blog    Blog   @relation(fields: [blogID], references: [id])
   blogID  Int
-}
-
-model Tag {
-  id      Int          @id @default(autoincrement())
-  tag     String       @unique
-  blog    Blog         @relation(fields: [blogID], references: [id])
-  blogID  Int
-  cTemp   CodeTemplate @relation(fields: [cTempID], references: [id])
-  cTempID Int
-}
-
-model Link {
-  id      Int          @id @default(autoincrement())
-  blog    Blog         @relation(fields: [blogID], references: [id])
-  blogID  Int
-  cTemp   CodeTemplate @relation(fields: [cTempID], references: [id])
-  cTempID Int
 }
