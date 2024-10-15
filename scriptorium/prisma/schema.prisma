@@ -71,13 +71,16 @@ model BlogTag {
 }
 
 model Comment {
-  id      Int    @id @default(autoincrement())
-  content String
-  flags   Int    @default(0)
-  up      Int    @default(0)
-  down    Int    @default(0)
-  user    User   @relation(fields: [userID], references: [id])
-  userID  Int
-  blog    Blog   @relation(fields: [blogID], references: [id])
-  blogID  Int
+  id              Int       @id @default(autoincrement())
+  content         String
+  flags           Int       @default(0)
+  up              Int       @default(0)
+  down            Int       @default(0)
+  user            User      @relation(fields: [userID], references: [id])
+  userID          Int
+  blog            Blog      @relation(fields: [blogID], references: [id])
+  blogID          Int
+  parentCommentID Int?
+  parentComment   Comment?  @relation("ParentChildComments", fields: [parentCommentID], references: [id])
+  childComments   Comment[] @relation("ParentChildComments")
 }
