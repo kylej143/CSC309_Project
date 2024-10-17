@@ -38,8 +38,8 @@ model CodeTemplate {
   user   User @relation(fields: [userID], references: [id])
   userID Int
 
-  Tag  Tag[]
-  Link Link[]
+  tags  Tag[] // a code template can have many tags
+  blogs Blog[] // a code template can be linked to many blogs
 }
 
 model Blog {
@@ -53,36 +53,29 @@ model Blog {
   user   User @relation(fields: [userID], references: [id])
   userID Int
 
-  Comment Comment[]
-  Tag     Tag[]
-  Link    Link[]
-}
-
-model Comment {
-  id      Int    @id @default(autoincrement())
-  content String
-  flags   Int    @default(0)
-  up      Int    @default(0)
-  down    Int    @default(0)
-  user    User   @relation(fields: [userID], references: [id])
-  userID  Int
-  blog    Blog   @relation(fields: [blogID], references: [id])
-  blogID  Int
+  comments  Comment[] // a blog can have many comments
+  tags      Tag[] // a blog can have many tags
+  templates CodeTemplate[] // a blog can link to many code templates
 }
 
 model Tag {
-  id      Int          @id @default(autoincrement())
-  tag     String       @unique
-  blog    Blog         @relation(fields: [blogID], references: [id])
-  blogID  Int
-  cTemp   CodeTemplate @relation(fields: [cTempID], references: [id])
-  cTempID Int
+  id        Int            @id @default(autoincrement())
+  tag       String         @unique
+  blogs     Blog[] // a tag can link to many blogs
+  templates CodeTemplate[] // a tag can have many code templates
 }
 
-model Link {
-  id      Int          @id @default(autoincrement())
-  blog    Blog         @relation(fields: [blogID], references: [id])
-  blogID  Int
-  cTemp   CodeTemplate @relation(fields: [cTempID], references: [id])
-  cTempID Int
+model Comment {
+  id              Int       @id @default(autoincrement())
+  content         String
+  flags           Int       @default(0)
+  up              Int       @default(0)
+  down            Int       @default(0)
+  user            User      @relation(fields: [userID], references: [id])
+  userID          Int
+  blog            Blog      @relation(fields: [blogID], references: [id])
+  blogID          Int
+  parentCommentID Int?
+  parentComment   Comment?  @relation("ParentChildComments", fields: [parentCommentID], references: [id])
+  childComments   Comment[] @relation("ParentChildComments")
 }
