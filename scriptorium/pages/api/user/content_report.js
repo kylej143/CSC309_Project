@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     const userV = token_handler(req, res);
 
     // 1. report
-    if (req.method === 'POST'){
+    if(req.method === 'POST'){
         if(userV){
             const {reason, blogID, commentID} = req.body;
 
