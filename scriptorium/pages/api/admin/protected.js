@@ -15,10 +15,10 @@ export default async function token_handler(req, res) {
         return false
     }
 
-    const {userId} = userV
+    const {username} = userV
     const user = await prisma.user.findUnique({
         where: {
-            id: userId,
+            username: username,
         },
     });
     if (!user) {
