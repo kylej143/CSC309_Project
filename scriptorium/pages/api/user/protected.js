@@ -5,11 +5,16 @@ import { verifyToken } from "@/utils/auth";
 export default async function token_handler(req, res) {
     const Authorization = req.headers.authorization;
 
+    let userV = token_handler(req, res)
+    if (!userV) {
+        return res.status(403).json({error: "403 Forbidden"})
+    }
+
     if (!Authorization) {
         return false
     }
 
-    let userV = await verifyToken(Authorization)
+    userV = await verifyToken(Authorization)
 
     if (!userV) {
         return false
