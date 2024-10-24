@@ -15,6 +15,11 @@ export default async function handler(req, res) {
 
         try {
             avatar = Number(avatar)
+            if (!(1 === avatar || 2 === avatar)) {
+                return res.status(400).json({
+                    error: "avatar must be 1 or 2, current choice of avatar does not exist",
+                });
+            }
         }
         catch (error) {
             return res.status(400).json({
@@ -24,22 +29,22 @@ export default async function handler(req, res) {
 
         if (phoneNumber) {
             try {
-                phoneNumber = phoneNumber.replace(/\s/g, "").replace("-", "");
+                phoneNumber = phoneNumber.replace(/\s/g, "");
                 if (phoneNumber.length !== 11) {
                     return res.status(400).json({
-                        error: "invalid phone number format, try: XXX-XXXX-XXXX",
+                        error: "invalid phone number format, try: XXX XXXX XXXX",
                     });
                 }
-                phoneNumber = Number(phoneNumber)
-                if (!phoneNumber) {
+                let isPNumber = Number(phoneNumber)
+                if (!isPNumber) {
                     return res.status(400).json({
-                        error: "invalid phone number format, try: XXX-XXXX-XXXX",
+                        error: "invalid phone number format, try: XXX XXXX XXXX",
                     });
                 }
             }
             catch (error) {
                 return res.status(400).json({
-                    error: "invalid phone number format, try: XXX-XXXX-XXXX",
+                    error: "invalid phone number format, try: XXX XXXX XXXX",
                 });
             }
         }
