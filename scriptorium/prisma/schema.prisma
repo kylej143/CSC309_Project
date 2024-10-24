@@ -21,6 +21,7 @@ model User {
   email       String  @unique
   avatar      Int     @default(0)
   phoneNumber String?
+  role        String  @default("USER")
 
   CodeTemplate CodeTemplate[]
   Blog         Blog[]
