@@ -16,15 +16,22 @@ export default async function token_handler(req, res) {
     }
 
     const {username} = userV
-    const user = await prisma.user.findUnique({
-        where: {
-            username: username,
-        },
-    });
-    if (!user) {
+
+    try {
+        const user = await prisma.user.findUnique({
+            where: {
+                username: username,
+            },
+        });
+        if (!user) {
+            return false
+        }
+
+        const {role} = user
+        return [role === "ADMIN", user]
+    }
+    catch (error) {
         return false
     }
 
-    const {role} = user
-    return role === "ADMIN"
 }
