@@ -1,5 +1,5 @@
 import prisma from "@/utils/db"
-import { verifyToken } from "@/utils/auth";
+import {verifyToken} from "@/utils/auth";
 
 
 export default async function token_handler(req) {
@@ -18,12 +18,11 @@ export default async function token_handler(req) {
     const {username} = userV
 
     try {
-        const user = await prisma.user.findUnique({
+        return await prisma.user.findUnique({
             where: {
                 username: username,
             },
         })
-        return user
     }
     catch (error) {
         return false
