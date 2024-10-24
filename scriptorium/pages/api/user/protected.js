@@ -17,10 +17,17 @@ export default async function token_handler(req, res) {
 
     const {username} = userV
 
-    const user = await prisma.user.findUnique({
-        where: {
-            username: username,
-        },
-    })
-    return user
+    try {
+        const user = await prisma.user.findUnique({
+            where: {
+                username: username,
+            },
+        })
+        return user
+    }
+    catch (error) {
+        return false
+    }
+
+
 }
