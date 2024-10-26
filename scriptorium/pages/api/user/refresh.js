@@ -5,7 +5,7 @@ export default async function handler(req, res) {
         const {refreshToken} = req.body
 
         if (!refreshToken) {
-            return res.status(401).json({
+            return res.status(400).json({
                 error: "no token",
             });
         }

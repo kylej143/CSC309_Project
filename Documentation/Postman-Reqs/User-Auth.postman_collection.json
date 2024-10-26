@@ -13,7 +13,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"tester1\",\r\n    \"password\": \"tester1ps\",\r\n    \"name\": \"student1\",\r\n    \"email\": \"goodbye@mail.com\",\r\n    \"avatar\": 2,\r\n    \"phoneNumber\": \"111 1111 1111\"\r\n}",
+					"raw": "{\r\n    \"username\": \"tester1\",\r\n    \"password\": \"Tester1ps\",\r\n    \"name\": \"student1\",\r\n    \"email\": \"goodbye@mail.com\",\r\n    \"avatar\": 2,\r\n    \"phoneNumber\": \"111 1111 1111\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -43,7 +43,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"tester2\",\r\n    \"password\": \"tester2ps\",\r\n    \"name\": \"student2\",\r\n    \"email\": \"hello@utoronto.mail.com\",\r\n    \"avatar\": 1,\r\n    \"phoneNumber\": \"12312341234\"\r\n}",
+					"raw": "{\r\n    \"username\": \"tester2\",\r\n    \"password\": \"Tester2ps\",\r\n    \"name\": \"student2\",\r\n    \"email\": \"hello@utoronto.mail.com\",\r\n    \"avatar\": 1,\r\n    \"phoneNumber\": \"12312341234\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -223,7 +223,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"tester1\",\r\n    \"password\": \"tester1ps\"\r\n}",
+					"raw": "{\r\n    \"username\": \"tester1\",\r\n    \"password\": \"Tester1ps\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -433,13 +433,43 @@
 			"response": []
 		},
 		{
+			"name": "Admin Register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"admin1\",\r\n    \"password\": \"Admin1psss\",\r\n    \"name\": \"admin\",\r\n    \"email\": \"admim@mail.com\",\r\n    \"avatar\": 2,\r\n    \"phoneNumber\": \"111 1111 1111\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/user/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"user",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Admin Login",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"tester1\",\r\n    \"password\": \"tester1ps\"\r\n}",
+					"raw": "{\r\n    \"username\": \"admin1\",\r\n    \"password\": \"Admin1psss\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
