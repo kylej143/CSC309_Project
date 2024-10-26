@@ -47,6 +47,28 @@ JSON PARAMS (ASSUME REQUIRED UNLESS OTHERWISE STATED)
 refreshToken: string of the refresh token given from login
 ```
 
+#### Edit: Edit the user onto the database
+
+```
+POST    ~/api/user/edit
+RETURN  (200 Access/Refresh Tokens) (405 Not Allowed) (401 Invalid Params) (403 Forbidden)
+
+HEADERS: (Authorization, Bearer <<replace with access token>>)
+JSON PARAMS (All not required)
+
+username (Unique): new username
+
+password: new password with a required strength (at least 9 long, 1 Number, 1 Capital)
+
+name: new name of the user
+
+email (Unique): new email of the form foo@domin
+
+avatar: integer from set (1: pizza, 2: corndog)
+
+phoneNumber: new phone number in the form XXX XXXX XXXX, must be 11 digits, whitespaces allowed
+```
+
 #### Protected_Test: Test API for user authentication of tokens.
 
 ```
