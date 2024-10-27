@@ -27,6 +27,29 @@ export default async function handler(req, res) {
             });
         }
 
+        try {
+            if (password.length < 9) {
+                return res.status(400).json({
+                    error: "PS: password too short, at least 9",
+                });
+            }
+            if (password.toLowerCase() === password) {
+                return res.status(400).json({
+                    error: "PS: include at least 1 capital letter",
+                });
+            }
+            if (!(/\d/.test(password))) {
+                return res.status(400).json({
+                    error: "PS: include at least 1 number",
+                });
+            }
+        }
+        catch (error) {
+            return res.status(400).json({
+                error: "invalid password",
+            });
+        }
+
         if (phoneNumber) {
             try {
                 phoneNumber = phoneNumber.replace(/\s/g, "");
