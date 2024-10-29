@@ -15,6 +15,11 @@ export default async function handler(req, res) {
 
         try {
             avatar = Number(avatar)
+            if (!(1 === avatar || 2 === avatar)) {
+                return res.status(400).json({
+                    error: "avatar must be 1 or 2, current choice of avatar does not exist",
+                });
+            }
         }
         catch (error) {
             return res.status(400).json({
@@ -22,24 +27,47 @@ export default async function handler(req, res) {
             });
         }
 
+        try {
+            if (password.length < 9) {
+                return res.status(400).json({
+                    error: "PS: password too short, at least 9",
+                });
+            }
+            if (password.toLowerCase() === password) {
+                return res.status(400).json({
+                    error: "PS: include at least 1 capital letter",
+                });
+            }
+            if (!(/\d/.test(password))) {
+                return res.status(400).json({
+                    error: "PS: include at least 1 number",
+                });
+            }
+        }
+        catch (error) {
+            return res.status(400).json({
+                error: "invalid password",
+            });
+        }
+
         if (phoneNumber) {
             try {
-                phoneNumber = phoneNumber.replace(/\s/g, "").replace("-", "");
+                phoneNumber = phoneNumber.replace(/\s/g, "");
                 if (phoneNumber.length !== 11) {
                     return res.status(400).json({
-                        error: "invalid phone number format, try: XXX-XXXX-XXXX",
+                        error: "invalid phone number format, try: XXX XXXX XXXX",
                     });
                 }
-                phoneNumber = Number(phoneNumber)
-                if (!phoneNumber) {
+                let isPNumber = Number(phoneNumber)
+                if (!isPNumber) {
                     return res.status(400).json({
-                        error: "invalid phone number format, try: XXX-XXXX-XXXX",
+                        error: "invalid phone number format, try: XXX XXXX XXXX",
                     });
                 }
             }
             catch (error) {
                 return res.status(400).json({
-                    error: "invalid phone number format, try: XXX-XXXX-XXXX",
+                    error: "invalid phone number format, try: XXX XXXX XXXX",
                 });
             }
         }
