@@ -20,6 +20,7 @@ export default async function handler(req, res) {
         const { title, content, tags, templates } = req.body;
         let newPost;
 
+        // Make the blog post
         try {
             if (!templates) {
                 newPost = await prisma.blog.create({
@@ -79,6 +80,67 @@ export default async function handler(req, res) {
         catch (error) {
             return res.status(400).json({ "message": "Could not create blog post" });
         }
+    }
+
+    // SEARCHING FOR BLOG POSTS
+    if (req.method === "GET") {
+
+        const title = req.query.title;
+        const content = req.query.content;
+
+        // create a list of tags from query
+        let tags = [];
+        if (req.query.tags) {
+            if (Array.isArray(req.query.tags)) {
+                tags = req.query.tags;
+            }
+            else {
+                tags.push(String(req.query.tags));
+            }
+        }
+
+        // create a list of code template ids from query
+        let templates = [];
+        if (req.query.templates) {
+            if (Array.isArray(req.query.templates)) {
+                templates = (req.query.templates).map((c) => Number(c));
+            }
+            else {
+                templates.push(Number(req.query.templates));
+            }
+        }
+
+        // filtered search
+        try {
+            const result = await prisma.blog.findMany({
+                where: {
+                    title: { contains: (title || ''), },
+                    content: { contains: (content || ''), },
+                    AND: [
+                        {
+                            AND: tags.map((t) => ({
+                                tags: {
+                                    some: { tag: t }
+                                }
+                            }))
+                        },
+                        {
+                            AND: templates.map((c) => ({
+                                templates: {
+                                    some: { id: c }
+                                }
+                            }))
+                        },
+                    ]
+                }
+            })
+
+            return res.status(200).json(result);
+        }
+        catch {
+            return res.status(400).json({ "message": "Could not search for blog posts" });
+        }
+
     }
 
     else {

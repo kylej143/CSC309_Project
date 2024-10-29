@@ -29,6 +29,12 @@ export default async function handler(req, res) {
                 return res.status(400).json({ "error": "Blog post does not exist" });
             }
 
+            // Check that the post actually belongs to the user - else, exit
+            if (Number(updatedPost.userID) != Number(userV.id)) {
+                return res.status(400).json({ "error": "No permission to edit the selected blog post" });
+            }
+
+            // Make updates
             if (title) {
                 updatedPost = await prisma.blog.update({
                     where: {
@@ -84,7 +90,7 @@ export default async function handler(req, res) {
                     }
                 })
 
-                // remove unused tags
+                // remove unused tags from database
                 await prisma.tag.deleteMany({
                     where: {
                         blogs: {
@@ -152,6 +158,12 @@ export default async function handler(req, res) {
                 return res.status(400).json({ "error": "Blog post does not exist" });
             }
 
+            // Check that the post actually belongs to the user - else, exit
+            if (Number(blogExists.userID) != Number(userV.id)) {
+                return res.status(400).json({ "error": "No permission to delete the selected blog post" });
+            }
+
+            // delete the post
             await prisma.blog.delete({
                 where: {
                     id,
@@ -170,6 +182,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ "message": "Blog post deleted" });
         }
         catch (error) {
+            console.log(error);
             return res.status(400).json({ "message": "Could not delete blog post" });
         }
 
