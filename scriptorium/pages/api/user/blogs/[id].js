@@ -103,7 +103,7 @@ export default async function handler(req, res) {
             if (templates) {
 
                 // disconnect existing templates
-                const disconnectTemplates = await prisma.blog.update({
+                await prisma.blog.update({
                     where: {
                         id,
                     },
@@ -182,8 +182,30 @@ export default async function handler(req, res) {
             return res.status(200).json({ "message": "Blog post deleted" });
         }
         catch (error) {
-            console.log(error);
             return res.status(400).json({ "message": "Could not delete blog post" });
+        }
+
+    }
+
+    // GET BLOG POST BY ID
+    else if (req.method === "GET") {
+
+        try {
+            const result = await prisma.blog.findUnique({
+                where: {
+                    id,
+                }
+            })
+
+            if (result) {
+                return res.status(200).json(result);
+            }
+            else {
+                return res.status(400).json({ "message": "Blog post does not exist" });
+            }
+        }
+        catch (error) {
+            return res.status(400).json({ "message": "Could not get blog post" });
         }
 
     }
