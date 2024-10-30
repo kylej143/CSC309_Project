@@ -27,7 +27,7 @@ export default async function handler(req, res){
     }
 
     // 2. view, search + 5. search(visitor)
-    if(req.method === 'GET'){
+    if(req.method === 'GET' && !(req.query.id || req.query.blogs)){
         const {title, tags, content} = req.query;
         
         let filter = {};
@@ -114,5 +114,40 @@ export default async function handler(req, res){
         }else{
             return res.status(403).json({error: "403 Forbidden"});
         }
+    }
+
+    // 5. GET BLOG POSTS THAT MENTION TEMPLATE
+    if (req.query.id && req.query.blogs && req.method === 'GET') {
+
+        const id = Number(req.query.id);
+
+        try {
+
+            // ensure that template exists
+            const templateResult = await prisma.codeTemplate.findUnique({
+                where: {
+                    id,
+                }
+            })
+
+            if (!templateResult) {
+                return res.status(400).json({ "message": "Template does not exist" });
+            }
+
+            // get associated blog posts
+            const result = await prisma.blog.findMany({
+                where: {
+                    templates: {
+                        some: { id: id },
+                    }
+                }
+            })
+
+            return res.status(201).json(result);
+        }
+        catch (error) {
+            return res.status(400).json({ "message": "Could not get associated blog posts" });
+        }
+
     }
 }

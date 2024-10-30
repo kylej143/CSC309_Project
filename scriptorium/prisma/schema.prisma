@@ -26,6 +26,8 @@ model User {
   CodeTemplate  CodeTemplate[]
   Blog          Blog[]
   Comment       Comment[]
+  BlogRating    BlogRating[] // a user can have many blog ratings
+  CommentRating CommentRating[] // a user can have many comment ratings
   ContentReport ContentReport[]
 }
 
@@ -45,20 +47,47 @@ model CodeTemplate {
 }
 
 model Blog {
-  id      Int     @id @default(autoincrement())
-  title   String
-  content String
-  flags   Int     @default(0)
-  up      Int     @default(0)
-  down    Int     @default(0)
-  hide    Boolean @default(false)
+  id            Int     @id @default(autoincrement())
+  title         String
+  content       String
+  flags         Int     @default(0)
+  up            Int     @default(0)
+  down          Int     @default(0)
+  difference    Int     @default(0)
+  absDifference Int     @default(0)
+  hide          Boolean @default(false)
 
   user   User @relation(fields: [userID], references: [id])
   userID Int
 
-  comments  Comment[] // a blog can have many comments
-  tags      Tag[] // a blog can have many tags
-  templates CodeTemplate[] // a blog can link to many code templates
+  comments   Comment[] // a blog can have many comments
+  tags       Tag[] // a blog can have many tags
+  templates  CodeTemplate[] // a blog can link to many code templates
+  BlogRating BlogRating[] // a blog can have many blog ratings
+}
+
+model BlogRating {
+  id       Int     @id @default(autoincrement())
+  user     User    @relation(fields: [userID], references: [id]) // a rating is associated with one user
+  userID   Int
+  blog     Blog    @relation(fields: [blogID], references: [id]) // a rating is associated with one blog
+  blogID   Int
+  upvote   Boolean @default(false)
+  downvote Boolean @default(false)
+
+  @@unique([userID, blogID]) // a user can only have one rating of a blog
+}
+
+model CommentRating {
+  id        Int     @id @default(autoincrement())
+  user      User    @relation(fields: [userID], references: [id]) // a rating is associated with one user
+  userID    Int
+  comment   Comment @relation(fields: [commentID], references: [id]) // a rating is associated with one blog
+  commentID Int
+  upvote    Boolean @default(false)
+  downvote  Boolean @default(false)
+
+  @@unique([userID, commentID]) // a user can only have one rating of a comment
 }
 
 model ContentReport {
@@ -83,6 +112,8 @@ model Comment {
   flags           Int       @default(0)
   up              Int       @default(0)
   down            Int       @default(0)
+  difference      Int       @default(0)
+  absDifference   Int       @default(0)
   hide            Boolean   @default(false)
   user            User      @relation(fields: [userID], references: [id])
   userID          Int
@@ -91,4 +122,6 @@ model Comment {
   parentCommentID Int?
   parentComment   Comment?  @relation("ParentChildComments", fields: [parentCommentID], references: [id])
   childComments   Comment[] @relation("ParentChildComments")
+
+  CommentRating CommentRating[] // a comment can have many comment ratings
 }
