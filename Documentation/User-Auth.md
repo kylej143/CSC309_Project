@@ -21,6 +21,7 @@ avatar: integer from set (1: pizza, 2: corndog)
 phoneNumber (Not Required): phone number in the form XXX XXXX XXXX, must be 11 digits, whitespaces allowed
 
 _ADMIN: ADMIN is only available by changing the role to "ADMIN" from a USER directly form the database (for security).
+An admin is created for you through the startup.sh file use (admin1, Admin1psss)
 ```
 
 #### Login: Login the user/admin onto the database
