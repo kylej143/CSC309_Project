@@ -82,7 +82,7 @@ export default async function handler(req, res) {
         }
     }
 
-    // SEARCHING FOR BLOG POSTS
+    // SEARCHING FOR BLOG POSTS AND SORT
     else if (req.method === "GET") {
 
         const title = req.query.title;
@@ -110,30 +110,115 @@ export default async function handler(req, res) {
             }
         }
 
+        // sort method
+        let sortMethod = req.query.sort;
+        if (sortMethod !== "valued" && sortMethod !== "controversial" && sortMethod != "recent") {
+            sortMethod = "valued"
+        }
+
         // filtered search
         try {
-            const result = await prisma.blog.findMany({
-                where: {
-                    title: { contains: (title || ''), },
-                    content: { contains: (content || ''), },
-                    AND: [
-                        {
-                            AND: tags.map((t) => ({
-                                tags: {
-                                    some: { tag: t }
-                                }
-                            }))
-                        },
-                        {
-                            AND: templates.map((c) => ({
-                                templates: {
-                                    some: { id: c }
-                                }
-                            }))
-                        },
-                    ]
-                }
-            })
+
+            let result;
+            if (sortMethod === "valued") {
+                // ordered by difference = upvotes - downvotes
+                // in the case of a tie, the blog with more upvotes is higher
+                result = await prisma.blog.findMany({
+                    where: {
+                        title: { contains: (title || ''), },
+                        content: { contains: (content || ''), },
+                        AND: [
+                            {
+                                AND: tags.map((t) => ({
+                                    tags: {
+                                        some: { tag: t }
+                                    }
+                                }))
+                            },
+                            {
+                                AND: templates.map((c) => ({
+                                    templates: {
+                                        some: { id: c }
+                                    }
+                                }))
+                            },
+                        ]
+                    },
+                    orderBy: [
+                        { difference: 'desc' },
+                        { up: 'desc' },
+                    ],
+                    include: {
+                        difference: false,
+                        absDifference: false,
+                    }
+                })
+            }
+            else if (sortMethod === "controversial") {
+                // ordered by absDifference = |upvotes - downvotes| --> smaller the difference, the more controversial it is
+                // in the case of a tie, the blog with more upvotes is higher
+                result = await prisma.blog.findMany({
+                    where: {
+                        title: { contains: (title || ''), },
+                        content: { contains: (content || ''), },
+                        AND: [
+                            {
+                                AND: tags.map((t) => ({
+                                    tags: {
+                                        some: { tag: t }
+                                    }
+                                }))
+                            },
+                            {
+                                AND: templates.map((c) => ({
+                                    templates: {
+                                        some: { id: c }
+                                    }
+                                }))
+                            },
+                        ],
+                    },
+                    orderBy: [
+                        { absDifference: 'asc' },
+                        { up: 'desc' },
+                    ],
+                    include: {
+                        difference: false,
+                        absDifference: false,
+                    }
+                })
+            }
+            else {
+                result = await prisma.blog.findMany({
+                    where: {
+                        title: { contains: (title || ''), },
+                        content: { contains: (content || ''), },
+                        AND: [
+                            {
+                                AND: tags.map((t) => ({
+                                    tags: {
+                                        some: { tag: t }
+                                    }
+                                }))
+                            },
+                            {
+                                AND: templates.map((c) => ({
+                                    templates: {
+                                        some: { id: c }
+                                    }
+                                }))
+                            },
+                        ],
+                    },
+                    orderBy: [
+                        { id: 'desc' }
+                    ],
+                    include: {
+                        difference: false,
+                        absDifference: false,
+                    }
+                })
+            }
 
             return res.status(200).json(result);
         }

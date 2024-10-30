@@ -164,10 +164,37 @@ export default async function handler(req, res) {
 
         // Update or create rating
         try {
-            // 1) if the rating already exists, set everything to false - this 
-            // ensures that the new rating does not "combine" with the old rating
-            // to create a true-true situation. if the rating does not exist, make it.
-            await prisma.blogRating.upsert({
+
+            // check if rating already exists
+            const existingRating = await prisma.blogRating.findUnique({
+                where: {
+                    userID_blogID: {
+                        userID: userID,
+                        blogID: id
+                    }
+                }
+            })
+
+            let upvoteChange = 0;
+            let downvoteChange = 0;
+            let diffChange = 0;
+
+            if (existingRating) {
+                // false, true --> false, false
+                // upvotechange = 0 - 0 = 0
+                // downvotechange = 0 - 1 = -1               
+                upvoteChange = Number(upvote) - Number(existingRating.upvote);
+                downvoteChange = Number(downvote) - Number(existingRating.downvote);
+                diffChange = calcUpvoteDifferenceChange(existingRating.upvote, existingRating.downvote, upvote, downvote);
+            }
+            else {
+                upvoteChange = Number(upvote);
+                downvoteChange = Number(downvote);
+                diffChange = calcUpvoteDifferenceChange(false, false, upvote, downvote);
+            }
+
+            // if rating exists, update; if does not exist, make it
+            const newRating = await prisma.blogRating.upsert({
                 where: {
                     userID_blogID: {
                         userID: userID,
@@ -175,10 +202,12 @@ export default async function handler(req, res) {
                     }
                 },
                 update: {
-                    upvote: false,
-                    downvote: false,
+                    upvote: upvote,
+                    downvote: downvote,
                 },
                 create: {
+                    upvote: upvote,
+                    downvote: downvote,
                     user: {
                         connect: { id: userID },
                     },
@@ -188,22 +217,32 @@ export default async function handler(req, res) {
                 },
             })
 
-            // 2) make the rating
-            const rating = await prisma.blogRating.update({
+            // update upvotes, downvotes, and difference on associated blog post
+            const associatedBlog = await prisma.blog.update({
                 where: {
-                    userID_blogID: {
-                        userID: userID,
-                        blogID: id
-                    }
+                    id: newRating.blogID,
                 },
                 data: {
-                    upvote: upvote,
-                    downvote: downvote
+                    up: { increment: upvoteChange },
+                    down: { increment: downvoteChange },
+                    difference: { increment: diffChange }
                 }
             })
 
+            // update absolute difference
+            const absDifference = Math.abs(associatedBlog.difference);
+            await prisma.blog.update({
+                where: {
+                    id: newRating.blogID,
+                },
+                data: {
+                    absDifference: absDifference,
+                }
+            })
+
+
             // If upvote and downvote are both false, then we should delete the rating
-            if (rating.upvote === false && rating.downvote === false) {
+            if (newRating.upvote === false && newRating.downvote === false) {
                 await prisma.blogRating.delete({
                     where: {
                         userID_blogID: {
@@ -215,7 +254,7 @@ export default async function handler(req, res) {
                 return res.status(200).json({ "message": "Removed rating" })
             }
 
-            return res.status(200).json(rating);
+            return res.status(200).json(newRating);
         }
         catch (error) {
             return res.status(400).json({ "message": "Could not make rating" })
@@ -297,5 +336,25 @@ export default async function handler(req, res) {
     else {
         return res.status(200).json({ "message": "Method not allowed" });
     }
+
+}
+
+export function calcUpvoteDifferenceChange(currUpvote, currDownvote, newUpvote, newDownvote) {
+    let diff = 0; // diff = upvotes - downvotes (5 - 3 = 2, 4 - 3 = 1, 5 - 2 = 3)
+
+    if (currUpvote) {
+        diff = diff - 1; // removing the upvote decreases difference by 1
+    }
+    else if (currDownvote) {
+        diff = diff + 1; // removing the downvote increases difference by 1
+    }
+
+    if (newUpvote) {
+        diff = diff + 1;
+    }
+    else if (newDownvote) {
+        diff = diff - 1;
+    }
+    return diff;
 
 }

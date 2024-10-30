@@ -207,7 +207,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:3000/api/user/blogs?title=java&content=yay",
+					"raw": "http://localhost:3000/api/user/blogs?title=java",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -225,7 +225,8 @@
 						},
 						{
 							"key": "content",
-							"value": "yay"
+							"value": "yay",
+							"disabled": true
 						},
 						{
 							"key": "tags",
@@ -374,6 +375,44 @@
 			"response": []
 		},
 		{
+			"name": "Reply to Existing Comment",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"content\": \"wow\",\r\n    \"parentCommentID\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/user/blogs/2/comments",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"user",
+						"blogs",
+						"2",
+						"comments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Upvote Blog Post",
 			"request": {
 				"method": "PUT",
@@ -386,7 +425,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"upvote\": true\r\n}",
+					"raw": "{\r\n    \"upvote\": true,\r\n    \"downvote\": false\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -423,7 +462,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"downvote\": true\r\n}",
+					"raw": "{\r\n    \"upvote\": true\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -431,7 +470,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:3000/api/user/blogs/4/comments/7",
+					"raw": "http://localhost:3000/api/user/blogs/2/comments/5",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -441,9 +480,65 @@
 						"api",
 						"user",
 						"blogs",
-						"4",
+						"2",
 						"comments",
-						"7"
+						"5"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Sort Blogs Valued",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/user/blogs?sort=valued",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"user",
+						"blogs"
+					],
+					"query": [
+						{
+							"key": "sort",
+							"value": "valued"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Sort Comments Controversial",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/user/blogs/2/comments?sort=controversial",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"user",
+						"blogs",
+						"2",
+						"comments"
+					],
+					"query": [
+						{
+							"key": "sort",
+							"value": "controversial"
+						}
 					]
 				}
 			},

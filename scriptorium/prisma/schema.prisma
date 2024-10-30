@@ -46,12 +46,14 @@ model CodeTemplate {
 }
 
 model Blog {
-  id      Int    @id @default(autoincrement())
-  title   String
-  content String
-  flags   Int    @default(0)
-  up      Int    @default(0)
-  down    Int    @default(0)
+  id            Int    @id @default(autoincrement())
+  title         String
+  content       String
+  flags         Int    @default(0)
+  up            Int    @default(0)
+  down          Int    @default(0)
+  difference    Int    @default(0)
+  absDifference Int    @default(0)
 
   user   User @relation(fields: [userID], references: [id])
   userID Int
@@ -99,6 +101,8 @@ model Comment {
   flags           Int       @default(0)
   up              Int       @default(0)
   down            Int       @default(0)
+  difference      Int       @default(0)
+  absDifference   Int       @default(0)
   user            User      @relation(fields: [userID], references: [id])
   userID          Int
   blog            Blog      @relation(fields: [blogID], references: [id])

@@ -98,4 +98,74 @@ export default async function handler(req, res) {
 
     }
 
+    // SORT COMMENTS
+    else if (req.method === "GET") {
+        let sortMethod = req.query.sort;
+        if (sortMethod !== "valued" && sortMethod !== "controversial" && sortMethod !== "recent") {
+            sortMethod = "valued"
+        }
+
+        try {
+            let comments;
+
+            if (sortMethod === "valued") {
+                // ordered by difference = upvotes - downvotes
+                // in the case of a tie, the comment with more upvotes is higher
+                comments = await prisma.comment.findMany({
+                    where: {
+                        blogID: blogID,
+                    },
+                    orderBy: [
+                        { difference: 'desc' },
+                        { up: 'desc' },
+                    ],
+                    include: {
+                        difference: false,
+                        absDifference: false,
+                    }
+                })
+            }
+            else if (sortMethod === "controversial") {
+                // ordered by absDifference = |upvotes - downvotes| --> smaller the difference, the more controversial it is
+                // in the case of a tie, the comment with more upvotes is higher
+                comments = await prisma.comment.findMany({
+                    where: {
+                        blogID: blogID,
+                    },
+                    orderBy: [
+                        { absDifference: 'asc' },
+                        { up: 'desc' },
+                    ],
+                    include: {
+                        difference: false,
+                        absDifference: false,
+                    }
+                })
+            }
+            else {
+                comments = await prisma.comment.findMany({
+                    where: {
+                        blogID: blogID,
+                    },
+                    orderBy: [
+                        { id: 'desc' },
+                    ],
+                    include: {
+                        difference: false,
+                        absDifference: false,
+                    }
+                })
+            }
+            return res.status(200).json(comments)
+        }
+        catch (error) {
+            return res.status(400).json({ "message": "Could not get comments" });
+        }
+
+    }
+
+    else {
+        return res.status(200).json({ "message": "Method not allowed" });
+    }
+
 }

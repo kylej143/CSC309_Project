@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import token_handler from '@/pages/api/user/protected.js';
+import { calcUpvoteDifferenceChange } from '@/pages/api/user/blogs/\[blogID\]/index.js';
 const prisma = new PrismaClient();
 
 export default async function handler(req, res) {
@@ -48,10 +49,37 @@ export default async function handler(req, res) {
 
         // Update or create rating
         try {
-            // 1) if the rating already exists, set everything to false - this 
-            // ensures that the new rating does not "combine" with the old rating
-            // to create a true-true situation. if the rating does not exist, make it.
-            await prisma.commentRating.upsert({
+
+            // check if rating already exists
+            const existingRating = await prisma.commentRating.findUnique({
+                where: {
+                    userID_commentID: {
+                        userID: userID,
+                        commentID: commentID
+                    }
+                }
+            })
+
+            let upvoteChange = 0;
+            let downvoteChange = 0;
+            let diffChange = 0;
+
+            if (existingRating) {
+                // false, true --> false, false
+                // upvotechange = 0 - 0 = 0
+                // downvotechange = 0 - 1 = -1         
+                upvoteChange = Number(upvote) - Number(existingRating.upvote);
+                downvoteChange = Number(downvote) - Number(existingRating.downvote);
+                diffChange = calcUpvoteDifferenceChange(existingRating.upvote, existingRating.downvote, upvote, downvote);
+            }
+            else {
+                upvoteChange = Number(upvote);
+                downvoteChange = Number(downvote);
+                diffChange = calcUpvoteDifferenceChange(false, false, upvote, downvote);
+            }
+
+            // if rating exists, update; if does not exist, make it
+            const newRating = await prisma.commentRating.upsert({
                 where: {
                     userID_commentID: {
                         userID: userID,
@@ -59,10 +87,12 @@ export default async function handler(req, res) {
                     }
                 },
                 update: {
-                    upvote: false,
-                    downvote: false,
+                    upvote: upvote,
+                    downvote: downvote,
                 },
                 create: {
+                    upvote: upvote,
+                    downvote: downvote,
                     user: {
                         connect: { id: userID },
                     },
@@ -72,22 +102,32 @@ export default async function handler(req, res) {
                 },
             })
 
-            // 2) make the rating
-            const rating = await prisma.commentRating.update({
+            // update upvotes, downvotes, and difference on associated comment post
+            const associatedComment = await prisma.comment.update({
                 where: {
-                    userID_commentID: {
-                        userID: userID,
-                        commentID: commentID
-                    }
+                    id: newRating.commentID,
                 },
                 data: {
-                    upvote: upvote,
-                    downvote: downvote
+                    up: { increment: upvoteChange },
+                    down: { increment: downvoteChange },
+                    difference: { increment: diffChange }
                 }
             })
 
+            // update absolute difference
+            const absDifference = Math.abs(associatedComment.difference);
+            await prisma.comment.update({
+                where: {
+                    id: newRating.commentID,
+                },
+                data: {
+                    absDifference: absDifference,
+                }
+            })
+
+
             // If upvote and downvote are both false, then we should delete the rating
-            if (rating.upvote === false && rating.downvote === false) {
+            if (newRating.upvote === false && newRating.downvote === false) {
                 await prisma.commentRating.delete({
                     where: {
                         userID_commentID: {
@@ -99,7 +139,7 @@ export default async function handler(req, res) {
                 return res.status(200).json({ "message": "Removed rating" })
             }
 
-            return res.status(200).json(rating);
+            return res.status(200).json(newRating);
         }
         catch (error) {
             return res.status(400).json({ "message": "Could not make rating" })
