@@ -83,7 +83,7 @@ export default async function handler(req, res) {
     }
 
     // SEARCHING FOR BLOG POSTS
-    if (req.method === "GET") {
+    else if (req.method === "GET") {
 
         const title = req.query.title;
         const content = req.query.content;
