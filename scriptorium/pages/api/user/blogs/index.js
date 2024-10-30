@@ -151,6 +151,7 @@ export default async function handler(req, res) {
                     include: {
                         difference: false,
                         absDifference: false,
+                        templates: true,
                     }
                 })
             }
@@ -185,6 +186,7 @@ export default async function handler(req, res) {
                     include: {
                         difference: false,
                         absDifference: false,
+                        templates: true,
                     }
                 })
             }
@@ -216,6 +218,7 @@ export default async function handler(req, res) {
                     include: {
                         difference: false,
                         absDifference: false,
+                        templates: true,
                     }
                 })
             }

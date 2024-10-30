@@ -317,6 +317,11 @@ export default async function handler(req, res) {
             const result = await prisma.blog.findUnique({
                 where: {
                     id,
+                },
+                include: {
+                    difference: false,
+                    absDifference: false,
+                    templates: true,
                 }
             })
 
