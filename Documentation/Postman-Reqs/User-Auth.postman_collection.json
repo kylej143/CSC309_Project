@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "7a6dfbf3-21d3-425d-9436-b3902a79668e",
+		"_postman_id": "f9d548a0-95ba-4bdc-85f9-a5dfa79c732e",
 		"name": "User/Auth",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "30075302"
@@ -73,7 +73,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"tester2\",\r\n    \"password\": \"wrongtesterps\",\r\n    \"name\": \"wrong-tester\",\r\n    \"email\": \"nonono@utoronto.mail.com\",\r\n    \"avatar\": 1,\r\n    \"phoneNumber\": \"12312341234\"\r\n}",
+					"raw": "{\r\n    \"username\": \"tester2\",\r\n    \"password\": \"Wrongtesterps1\",\r\n    \"name\": \"wrong-tester\",\r\n    \"email\": \"nonono@utoronto.mail.com\",\r\n    \"avatar\": 1,\r\n    \"phoneNumber\": \"12312341234\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -133,7 +133,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"wrong-tester\",\r\n    \"password\": \"wrongtesterps\",\r\n    \"name\": \"wrong-tester\",\r\n    \"email\": \"hello@utoronto.mail.com\",\r\n    \"avatar\": 1,\r\n    \"phoneNumber\": \"12312341234\"\r\n}",
+					"raw": "{\r\n    \"username\": \"wrong-tester\",\r\n    \"password\": \"Wrongtesterps1\",\r\n    \"name\": \"wrong-tester\",\r\n    \"email\": \"hello@utoronto.mail.com\",\r\n    \"avatar\": 1,\r\n    \"phoneNumber\": \"12312341234\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -163,7 +163,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"wrong-tester\",\r\n    \"password\": \"wrongtesterps\",\r\n    \"name\": \"wrong-tester\",\r\n    \"email\": \"wrong-tester@utoronto.mail.com\",\r\n    \"avatar\": 3,\r\n    \"phoneNumber\": \"12312341234\"\r\n}",
+					"raw": "{\r\n    \"username\": \"wrong-tester\",\r\n    \"password\": \"Wrongtesterps1\",\r\n    \"name\": \"wrong-tester\",\r\n    \"email\": \"wrong-tester@utoronto.mail.com\",\r\n    \"avatar\": 3,\r\n    \"phoneNumber\": \"12312341234\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -193,7 +193,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"wrong-tester\",\r\n    \"password\": \"wrongtesterps\",\r\n    \"name\": \"wrong-tester\",\r\n    \"email\": \"wrong-tester@utoronto.mail.com\",\r\n    \"avatar\": 2,\r\n    \"phoneNumber\": \"12a 1234 1234\"\r\n}",
+					"raw": "{\r\n    \"username\": \"wrong-tester\",\r\n    \"password\": \"Wrongtesterps1\",\r\n    \"name\": \"wrong-tester\",\r\n    \"email\": \"wrong-tester@utoronto.mail.com\",\r\n    \"avatar\": 2,\r\n    \"phoneNumber\": \"12a 1234 1234\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -403,7 +403,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"tester1\",\r\n    \"password\": \"Tester1ps\"\r\n}",
+					"raw": "{\r\n    \"username\": \"tester2\",\r\n    \"password\": \"Tester2ps\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -433,7 +433,7 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjcsInVzZXJuYW1lIjoidGVzdGVyMiIsImlhdCI6MTcyOTk4NDUwOCwiZXhwIjoxNzI5OTg1MTA4fQ.jjgM5_EU9Klag1xf_A3c6Y8rjKQOHvvEp12jxpBISGQ",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjksInVzZXJuYW1lIjoidGVzdGVyMiIsImlhdCI6MTcyOTk4NzQ3MSwiZXhwIjoxNzI5OTg4MDcxfQ.-bTE6gSlW5DFGrQFPu7-FABrcYfDxWWk3vKim04e6mM",
 						"type": "text"
 					}
 				],
@@ -469,7 +469,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"tester2\",\r\n    \"password\": \"Tester2ps\"\r\n}",
+					"raw": "{\r\n    \"username\": \"tester3\",\r\n    \"password\": \"Tester3ps\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -523,36 +523,6 @@
 						"api",
 						"user",
 						"protected_test"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Admin Register",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"admin1\",\r\n    \"password\": \"Admin1psss\",\r\n    \"name\": \"admin\",\r\n    \"email\": \"admim@mail.com\",\r\n    \"avatar\": 2,\r\n    \"phoneNumber\": \"111 1111 1111\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:3000/api/user/register",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"api",
-						"user",
-						"register"
 					]
 				}
 			},
