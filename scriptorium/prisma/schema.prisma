@@ -47,9 +47,10 @@ model Blog {
   id      Int    @id @default(autoincrement())
   title   String
   content String
-  flags   Int    @default(0)
-  up      Int    @default(0)
-  down    Int    @default(0)
+  flags   Int      @default(0)
+  up      Int      @default(0)
+  down    Int      @default(0)
+  hide    Boolean  @default(false)
 
   user   User @relation(fields: [userID], references: [id])
   userID Int
@@ -57,6 +58,15 @@ model Blog {
   comments  Comment[] // a blog can have many comments
   tags      Tag[] // a blog can have many tags
   templates CodeTemplate[] // a blog can link to many code templates
+}
+
+model ContentReport{
+  id      Int    @id @default(autoincrement())
+  reason    String
+  user    User   @relation(fields: [userID], references: [id])
+  userID  Int
+  blogID  Int
+  commentID Int
 }
 
 model Tag {
@@ -72,6 +82,7 @@ model Comment {
   flags           Int       @default(0)
   up              Int       @default(0)
   down            Int       @default(0)
+  hide            Boolean   @default(false)
   user            User      @relation(fields: [userID], references: [id])
   userID          Int
   blog            Blog      @relation(fields: [blogID], references: [id])
