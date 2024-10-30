@@ -1,33 +1,65 @@
 import { exec } from 'child_process';
-import token_handler from "./protected";
 import fs from "node:fs";
 
 export default async function handler(req, res) {
     if (req.method === "GET") {
 
-        let userV = await token_handler(req, res)
+        let { shell_code, code, language } = req.body
+        const file_name = Date.now().toString()
 
-        if (!userV) {
-            return res.status(403).json({error: "403 Forbidden"})
+        let ext = null
+        let executes = null
+        switch (language) {
+            case "python":
+                ext = "py"
+                executes = "py"
+                break;
+            case "javascript":
+                ext = "js"
+                executes = "node"
+                break;
+            case "java":
+                ext = "java"
+                break;
+            case "c":
+                ext = "c"
+                break;
+            case "c++":
+                ext = "cpp"
+                break;
         }
 
-        let { shell_code, code, language } = req.body
-
         try {
-            const fs = require('node:fs');
-            await fs.writeFile(`run_folder/code${userV.id}.txt`, code, (err) => {if (err) throw err;})
+            await fs.writeFile(`run_folder/code${file_name}.${ext}`, code, (err) => {if (err) throw err;})
         }
         catch (e) {
             return res.status(500).json({ message: "Failed duplicating code" });
         }
 
-        try {
-            let cmd = language + " run_folder/code1.txt";
-            const result = await shell(cmd)
-            return res.status(200).json(result)
+        if (language === "python" || language === "javascript") {
+            try {
+                let cmd = executes + " " + `run_folder/code${file_name}.${ext}`;
+                const result = await shell(cmd)
+                let delete_cmd = "rm " + `run_folder/code${file_name}.${ext}`
+                await shell(delete_cmd)
+                return res.status(200).json(result)
+
+            }
+            catch (e) {
+                return res.status(500).json({error: "something went wrong??"});
+            }
         }
-        catch (e) {
-            return res.status(500).json({error: "something went wrong??"});
+
+        if (language === "java") {
+
+        }
+
+        if (language === "c") {
+
+        }
+
+        if (language === "c++") {
+
         }
 
     } else {
@@ -36,7 +68,7 @@ export default async function handler(req, res) {
 }
 
 async function shell(cmd) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve) {
         exec(cmd, (err, stdout, stderr) => {
             if (err) {
                 resolve({ stderr });
