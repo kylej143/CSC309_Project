@@ -23,9 +23,10 @@ model User {
   phoneNumber String?
   role        String  @default("USER")
 
-  CodeTemplate CodeTemplate[]
-  Blog         Blog[]
-  Comment      Comment[]
+  CodeTemplate  CodeTemplate[]
+  Blog          Blog[]
+  Comment       Comment[]
+  ContentReport ContentReport[]
 }
 
 model CodeTemplate {
@@ -44,13 +45,13 @@ model CodeTemplate {
 }
 
 model Blog {
-  id      Int    @id @default(autoincrement())
+  id      Int     @id @default(autoincrement())
   title   String
   content String
-  flags   Int      @default(0)
-  up      Int      @default(0)
-  down    Int      @default(0)
-  hide    Boolean  @default(false)
+  flags   Int     @default(0)
+  up      Int     @default(0)
+  down    Int     @default(0)
+  hide    Boolean @default(false)
 
   user   User @relation(fields: [userID], references: [id])
   userID Int
@@ -60,12 +61,12 @@ model Blog {
   templates CodeTemplate[] // a blog can link to many code templates
 }
 
-model ContentReport{
-  id      Int    @id @default(autoincrement())
+model ContentReport {
+  id        Int    @id @default(autoincrement())
   reason    String
-  user    User   @relation(fields: [userID], references: [id])
-  userID  Int
-  blogID  Int
+  user      User   @relation(fields: [userID], references: [id])
+  userID    Int
+  blogID    Int
   commentID Int
 }
 
