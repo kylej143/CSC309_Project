@@ -4,7 +4,7 @@ import token_handler from '@/pages/api/admin/protected';
 const prisma = new PrismaClient();
 
 export default async function handler(req, res){
-    const adminV = token_handler(req, res);
+    const adminV = await token_handler(req, res);
 
     if(adminV){
         // 2. sort

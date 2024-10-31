@@ -4,7 +4,7 @@ import token_handler from '@/pages/api/user/protected';
 const prisma = new PrismaClient();
 
 export default async function handler(req, res){
-    const userV = token_handler(req, res);
+    const userV = await token_handler(req, res);
 
     // 1. report
     if(req.method === 'POST'){
