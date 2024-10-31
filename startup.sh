@@ -5,4 +5,4 @@ npm i sqlite3 --save
 npm i sqlite --save
 npx prisma generate
 npx prisma migrate dev
-node .\\utils\\add_admin.js
+node utils/add_admin.js
