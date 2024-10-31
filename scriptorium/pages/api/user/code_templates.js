@@ -38,13 +38,13 @@ export default async function handler(req, res){
         if(title){
             filter.title = {equals: title};
         }
-        if (tags) {
-            const tagList = tags.split(',').map(t => t.trim()).filter(Boolean);
-            if (tagList.length > 0) {
+        if(tags){
+            const tt = tags.split(',').map(t => t.trim()).filter(Boolean);
+            if(tt.length > 0){
                 filter.tags = {
                     some: {
                         tag: {
-                            in: tagList
+                            in: tt
                         }
                     }
                 };
