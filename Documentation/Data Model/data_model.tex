@@ -13,7 +13,7 @@
 
 \begin{itemize}
 \item
-User(\underline{uID}, username, password, name, email, avatar, phoneNumber)
+User(\underline{uID}, username, password, name, email, avatar, phoneNumber, role)
 
 \item
 CodeTemplate(\underline{ctID}, uID, title, explanation, code, forkID, private)
@@ -25,18 +25,46 @@ The forkID is the ctID of the original template, null if the template is not for
 \end{itemize}
 
 \item
-Blog(\underline{bID}, uID, title, content, up, down, flags)
+Blog(\underline{bID}, uID, title, content, up, down, flags, difference, absDifference, hide)
 \textbf{Integrity Constraints:}
 \begin{itemize}
 \item Blog[uID] $\subseteq$ User[uID]
 \end{itemize}
 
 \item
-Comment(\underline{cID}, bID, uID, up, down, content, flags)
+BlogRating(\underline{brID}, \underline{uID, bID}, upvote, downvote)
+\textbf{Integrity Constraints:}
+\begin{itemize}
+\item BlogRating[uID] $\subseteq$ User[uID]
+\item BlogRating[bID] $\subseteq$ Blog[bID]
+\end{itemize}
+
+\item
+CommentRating(\underline{crID}, \underline{uID, bID}, upvote, downvote)
+\textbf{Integrity Constraints:}
+\begin{itemize}
+\item CommentRating[uID] $\subseteq$ User[uID]
+\item CommentRating[bID] $\subseteq$ Blog[bID]
+\end{itemize}
+
+\item
+ContentReport(\underline{contentRID}, uID, bID, cID, reason)
+\textbf{Integrity Constraints:}
+\begin{itemize}
+\item contentRID[uID] $\subseteq$ User[uID]
+\item contentRID[bID] $\subseteq$ Blog[bID]
+\item contentRID[cID] $\subseteq$ Comment[cID]
+\end{itemize}
+
+\break
+\item
+Comment(\underline{cID}, bID, uID, up, down, content, difference, absDifference, hide, parentCommentID, childComments)
 \textbf{Integrity Constraints:}
 \begin{itemize}
 \item Comment[uID] $\subseteq$ User[uID]
 \item Comment[bID] $\subseteq$ Blog[bID]
+\item Comment[parentCommentID] $\subseteq$ Comment[cID]
+\item Comment[childComments] $\subseteq$ Comment[cID]
 \end{itemize}
 
 \item
@@ -46,15 +74,6 @@ Tag(\underline{tID}, bID, ctID, tag)
 \item Tag[ctID] $\subseteq$ CodeTemplate[ctID]
 \item Tag[bID] $\subseteq$ Blog[bID]
 \end{itemize}
-
-\item
-Link(\underline{tID}, bID, ctID)
-\textbf{Integrity Constraints:}
-\begin{itemize}
-\item Link[ctID] $\subseteq$ CodeTemplate[ctID]
-\item Link[bID] $\subseteq$ Blog[bID]
-\end{itemize}
-
 
 \end{itemize}
 \end{document}
