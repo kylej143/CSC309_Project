@@ -12,7 +12,7 @@ export default async function handler(req, res) {
         switch (language) {
             case "python":
                 ext = "py"
-                executes = "py"
+                executes = "python3"
                 break;
             case "javascript":
                 ext = "js"
