@@ -1,6 +1,7 @@
 # node and npm
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
 source ~/.bashrc
+export NVM_DIR="$HOME/.nvm"
 nvm install v22.11.0
 
 node -v # should print `v22.11.0`
