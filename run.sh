@@ -1,4 +1,3 @@
-#!/bin/bash
 #lanIp="$(ip -4 -o -br addr|awk '$0 ~ /^[we]\w+\s+UP\s+/ {str = gsub("/[1-9][0-9]*", "", $0); print $3}')";
 #wanIp="$(curl https://ipinfo.io/ip 2>/dev/null)";
 #
