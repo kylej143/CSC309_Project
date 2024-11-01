@@ -28,7 +28,9 @@ npx prisma generate
 npx prisma migrate dev
 node utils/add_admin.js
 
+echo \n nodejs +20\n
 node -v # should print `v22.11.0`
+echo npm +20\n
 npm -v # should print `10.9.0`
 java --version
 javac --version
