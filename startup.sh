@@ -8,6 +8,7 @@ nvm install v22.11.0
 
 node -v # should print `v22.11.0`
 npm -v # should print `10.9.0`
+source ~/.bashrc
 
 # java
 sudo apt install default-jre
