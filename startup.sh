@@ -5,21 +5,15 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 nvm install v22.11.0
-
-node -v # should print `v22.11.0`
-npm -v # should print `10.9.0`
 source ~/.bashrc
 
 # java
 sudo apt install default-jre
 sudo apt install default-jdk
-java -version
-javac --version
 
 # python 3.10
 sudo apt update
 sudo apt install python3
-python3 --version
 
 # gcc and g++
 sudo apt-get update
@@ -33,3 +27,11 @@ npm i sqlite --save
 npx prisma generate
 npx prisma migrate dev
 node utils/add_admin.js
+
+node -v # should print `v22.11.0`
+npm -v # should print `10.9.0`
+java --version
+javac --version
+python3 --version
+gcc --version
+g++ --version
