@@ -8,6 +8,7 @@ npm -v # should print `10.9.0`
 
 # java
 sudo apt install default-jre
+sudo yum install java
 java -version
 
 # python 3.10
