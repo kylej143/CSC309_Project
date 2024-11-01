@@ -1,8 +1,8 @@
 # node and npm
-sudo apt-get install zip unzip
-curl -fsSL https://fnm.vercel.app/install | bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
 source ~/.bashrc
-fnm use --install-if-missing 22
+nvm install v22.11.0
+
 node -v # should print `v22.11.0`
 npm -v # should print `10.9.0`
 
