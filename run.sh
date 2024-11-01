@@ -5,6 +5,7 @@
 #echo "Your private ip is: ${lanIp}";
 #echo "Your public ip is: ${wanIp}";
 
+source ~/.bashrc
 npx prisma generate
 npx prisma migrate dev
 npm run dev
