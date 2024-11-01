@@ -6,6 +6,7 @@ By: Kyle Joung, Jessica Song Li, Woojin Jang
 On terminal:
 * cd scriptorium   # THIS PART IS IMPORTANT 😭😭😭
 * ../startup.sh
+* source ~/.bashrc    # 😭😭😭😭😭😭😭😭😭
 * ../run.sh
 
 
