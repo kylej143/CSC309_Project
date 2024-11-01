@@ -10,6 +10,7 @@ npm -v # should print `10.9.0`
 sudo apt install default-jre
 sudo apt install default-jdk
 java -version
+javac --version
 
 # python 3.10
 sudo apt update
