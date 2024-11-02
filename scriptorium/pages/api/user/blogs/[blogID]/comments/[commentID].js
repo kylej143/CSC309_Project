@@ -33,6 +33,17 @@ export default async function handler(req, res) {
             return res.status(400).json({ "error": "Cannot find comment" });
         }
 
+        // Ensure comment is not hidden
+        const checkHidden = await prisma.comment.findUnique({
+            where: {
+                id: commentID,
+            }
+        })
+
+        if (checkHidden.hide === true) {
+            return res.status(400).json({ "error": "Cannot rate comment" });
+        }
+
         // Check valid rating
         const ratings = [true, false]
         if ((req.body.upvote && !ratings.includes(req.body.upvote)) || (req.body.downvote && !ratings.includes(req.body.downvote))) {

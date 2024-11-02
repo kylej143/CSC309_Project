@@ -34,6 +34,11 @@ export default async function handler(req, res) {
                 return res.status(400).json({ "error": "No permission to edit the selected blog post" });
             }
 
+            // If post is hidden, cannot edit
+            if (updatedPost.hide === true) {
+                return res.status(400).json({ "message": "Cannot edit post that has been hidden by administrator" });
+            }
+
             // Make updates
             if (title) {
                 updatedPost = await prisma.blog.update({
@@ -149,6 +154,21 @@ export default async function handler(req, res) {
 
         const userID = Number(userV.id);
 
+        // Ensure blog is not hidden
+        const checkHidden = await prisma.blog.findUnique({
+            where: {
+                id: id,
+            }
+        })
+
+        if (!checkHidden) {
+            return res.status(400).json({ "error": "Cannot find blog" });
+        }
+
+        if (checkHidden.hide === true) {
+            return res.status(400).json({ "error": "Cannot rate blog" });
+        }
+
         // Check valid rating
         if ((req.body.upvote && !ratings.includes(req.body.upvote)) || (req.body.downvote && !ratings.includes(req.body.downvote))) {
             return res.status(400).json({ "message": "Invalid rating" });
@@ -251,13 +271,13 @@ export default async function handler(req, res) {
                         }
                     }
                 })
-                return res.status(200).json({ "message": "Removed rating" })
+                return res.status(200).json({ "message": "Removed rating" });
             }
 
             return res.status(200).json(newRating);
         }
         catch (error) {
-            return res.status(400).json({ "message": "Could not make rating" })
+            return res.status(400).json({ "message": "Could not make rating" });
         }
 
     }
@@ -284,6 +304,11 @@ export default async function handler(req, res) {
             // Check that the post actually belongs to the user - else, exit
             if (Number(blogExists.userID) != Number(userV.id)) {
                 return res.status(400).json({ "error": "No permission to delete the selected blog post" });
+            }
+
+            // If post is hidden, cannot edit
+            if (blogExists.hide === true) {
+                return res.status(400).json({ "message": "Cannot delete post that has been hidden by administrator" });
             }
 
             // delete the post
@@ -314,14 +339,32 @@ export default async function handler(req, res) {
     else if (req.method === "GET") {
 
         try {
+
+            // ensures that if the blog post is hidden, it will not show
+            // except to the original author
+            let userLogID = -1;
+            if (userV) {
+                userLogID = userV.id;
+            }
+
             const result = await prisma.blog.findUnique({
                 where: {
-                    id,
+                    id: id,
+                    OR: [
+                        { hide: false },
+                        { userID: userLogID },
+                    ]
                 },
                 include: {
                     difference: false,
                     absDifference: false,
                     templates: true,
+                    BlogReport: {
+                        include: {
+                            userID: false,
+                            blogID: false,
+                        }
+                    }
                 }
             })
 

@@ -116,6 +116,13 @@ export default async function handler(req, res) {
             sortMethod = "valued"
         }
 
+        // ensures that if the blog post is hidden, it will not show
+        // except to the original author
+        let userLogID = -1;
+        if (userV) {
+            userLogID = userV.id;
+        }
+
         // filtered search
         try {
 
@@ -127,6 +134,10 @@ export default async function handler(req, res) {
                     where: {
                         title: { contains: (title || ''), },
                         content: { contains: (content || ''), },
+                        OR: [
+                            { hide: false },
+                            { userID: userLogID },
+                        ],
                         AND: [
                             {
                                 AND: tags.map((t) => ({
@@ -152,6 +163,12 @@ export default async function handler(req, res) {
                         difference: false,
                         absDifference: false,
                         templates: true,
+                        BlogReport: {
+                            include: {
+                                userID: false,
+                                blogID: false,
+                            }
+                        }
                     }
                 })
             }
@@ -162,6 +179,10 @@ export default async function handler(req, res) {
                     where: {
                         title: { contains: (title || ''), },
                         content: { contains: (content || ''), },
+                        OR: [
+                            { hide: false },
+                            { userID: userLogID },
+                        ],
                         AND: [
                             {
                                 AND: tags.map((t) => ({
@@ -187,6 +208,12 @@ export default async function handler(req, res) {
                         difference: false,
                         absDifference: false,
                         templates: true,
+                        BlogReport: {
+                            include: {
+                                userID: false,
+                                blogID: false,
+                            }
+                        }
                     }
                 })
             }
@@ -195,6 +222,10 @@ export default async function handler(req, res) {
                     where: {
                         title: { contains: (title || ''), },
                         content: { contains: (content || ''), },
+                        OR: [
+                            { hide: false },
+                            { userID: userLogID },
+                        ],
                         AND: [
                             {
                                 AND: tags.map((t) => ({
@@ -219,6 +250,12 @@ export default async function handler(req, res) {
                         difference: false,
                         absDifference: false,
                         templates: true,
+                        BlogReport: {
+                            include: {
+                                userID: false,
+                                blogID: false,
+                            }
+                        }
                     }
                 })
             }

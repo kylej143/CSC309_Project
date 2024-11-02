@@ -105,6 +105,13 @@ export default async function handler(req, res) {
             sortMethod = "valued"
         }
 
+        // ensures that if the comment is hidden, it will not be visible
+        // except to the original author
+        let userLogID = -1;
+        if (userV) {
+            userLogID = userV.id;
+        }
+
         try {
             let comments;
 
@@ -114,6 +121,10 @@ export default async function handler(req, res) {
                 comments = await prisma.comment.findMany({
                     where: {
                         blogID: blogID,
+                        OR: [
+                            { hide: false },
+                            { userID: userLogID },
+                        ],
                     },
                     orderBy: [
                         { difference: 'desc' },
@@ -122,6 +133,12 @@ export default async function handler(req, res) {
                     include: {
                         difference: false,
                         absDifference: false,
+                        CommentReport: {
+                            include: {
+                                userID: false,
+                                commentID: false,
+                            }
+                        }
                     }
                 })
             }
@@ -131,6 +148,10 @@ export default async function handler(req, res) {
                 comments = await prisma.comment.findMany({
                     where: {
                         blogID: blogID,
+                        OR: [
+                            { hide: false },
+                            { userID: userLogID },
+                        ],
                     },
                     orderBy: [
                         { absDifference: 'asc' },
@@ -139,6 +160,12 @@ export default async function handler(req, res) {
                     include: {
                         difference: false,
                         absDifference: false,
+                        CommentReport: {
+                            include: {
+                                userID: false,
+                                commentID: false,
+                            }
+                        }
                     }
                 })
             }
@@ -146,6 +173,10 @@ export default async function handler(req, res) {
                 comments = await prisma.comment.findMany({
                     where: {
                         blogID: blogID,
+                        OR: [
+                            { hide: false },
+                            { userID: userLogID },
+                        ],
                     },
                     orderBy: [
                         { id: 'desc' },
@@ -153,6 +184,12 @@ export default async function handler(req, res) {
                     include: {
                         difference: false,
                         absDifference: false,
+                        CommentReport: {
+                            include: {
+                                userID: false,
+                                commentID: false,
+                            }
+                        }
                     }
                 })
             }
