@@ -1,11 +1,13 @@
 import { PrismaClient } from '@prisma/client';
 import token_handler from '@/pages/api/user/protected.js';
+import admin_token_handler from '@/pages/api/admin/protected';
 const prisma = new PrismaClient();
 
 
 export default async function handler(req, res) {
 
     const userV = await token_handler(req, res);
+    const adminV = await admin_token_handler(req, res);
 
     // CREATING BLOG POSTS
     if (req.method === "POST") {
@@ -78,7 +80,7 @@ export default async function handler(req, res) {
         }
 
         catch (error) {
-            return res.status(400).json({ "message": "Could not create blog post" });
+            return res.status(400).json({ "error": "Could not create blog post" });
         }
     }
 
@@ -123,6 +125,13 @@ export default async function handler(req, res) {
             userLogID = userV.id;
         }
 
+        let orCheck = [{ hide: false }, { userID: userLogID }]
+
+        // admin should be able to see anything
+        // if (adminV) {
+        //     orCheck = [{ hide: false }, { hide: true }]
+        // }
+
         // filtered search
         try {
 
@@ -134,10 +143,7 @@ export default async function handler(req, res) {
                     where: {
                         title: { contains: (title || ''), },
                         content: { contains: (content || ''), },
-                        OR: [
-                            { hide: false },
-                            { userID: userLogID },
-                        ],
+                        OR: orCheck,
                         AND: [
                             {
                                 AND: tags.map((t) => ({
@@ -179,10 +185,7 @@ export default async function handler(req, res) {
                     where: {
                         title: { contains: (title || ''), },
                         content: { contains: (content || ''), },
-                        OR: [
-                            { hide: false },
-                            { userID: userLogID },
-                        ],
+                        OR: orCheck,
                         AND: [
                             {
                                 AND: tags.map((t) => ({
@@ -222,10 +225,7 @@ export default async function handler(req, res) {
                     where: {
                         title: { contains: (title || ''), },
                         content: { contains: (content || ''), },
-                        OR: [
-                            { hide: false },
-                            { userID: userLogID },
-                        ],
+                        OR: orCheck,
                         AND: [
                             {
                                 AND: tags.map((t) => ({
@@ -263,13 +263,13 @@ export default async function handler(req, res) {
             return res.status(200).json(result);
         }
         catch (error) {
-            return res.status(400).json({ "message": "Could not search for blog posts" });
+            return res.status(400).json({ "error": "Could not search for blog posts" });
         }
 
     }
 
     else {
-        return res.status(200).json({ "message": "Method not allowed" });
+        return res.status(400).json({ "error": "Method not allowed" });
     }
 
 

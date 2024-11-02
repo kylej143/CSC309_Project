@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import token_handler from '@/pages/api/user/protected.js';
+import admin_token_handler from '@/pages/api/admin/protected';
 const prisma = new PrismaClient();
 
 export default async function handler(req, res) {
@@ -7,6 +8,7 @@ export default async function handler(req, res) {
     let id = Number(blogID);
 
     const userV = await token_handler(req, res);
+    const adminV = await admin_token_handler(req, res);
     const ratings = [true, false]
 
     // EDITING BLOG POSTS
@@ -35,8 +37,8 @@ export default async function handler(req, res) {
             }
 
             // If post is hidden, cannot edit
-            if (updatedPost.hide === true) {
-                return res.status(400).json({ "message": "Cannot edit post that has been hidden by administrator" });
+            if (updatedPost.hide === true && !adminV) {
+                return res.status(400).json({ "error": "Cannot edit post that has been hidden by administrator" });
             }
 
             // Make updates
@@ -139,7 +141,7 @@ export default async function handler(req, res) {
         }
 
         catch (error) {
-            return res.status(400).json({ "message": "Could not update blog post" });
+            return res.status(400).json({ "error": "Could not update blog post" });
         }
 
     }
@@ -165,13 +167,13 @@ export default async function handler(req, res) {
             return res.status(400).json({ "error": "Cannot find blog" });
         }
 
-        if (checkHidden.hide === true) {
+        if (checkHidden.hide === true && !adminV) {
             return res.status(400).json({ "error": "Cannot rate blog" });
         }
 
         // Check valid rating
         if ((req.body.upvote && !ratings.includes(req.body.upvote)) || (req.body.downvote && !ratings.includes(req.body.downvote))) {
-            return res.status(400).json({ "message": "Invalid rating" });
+            return res.status(400).json({ "error": "Invalid rating" });
         }
 
         const upvote = (req.body.upvote === true);
@@ -179,7 +181,7 @@ export default async function handler(req, res) {
 
         // Cannot both upvote and downvote a post
         if (upvote && downvote) {
-            return res.status(200).json({ "message": "Cannot upvote and downvote same post" });
+            return res.status(400).json({ "error": "Cannot upvote and downvote same post" });
         }
 
         // Update or create rating
@@ -277,7 +279,7 @@ export default async function handler(req, res) {
             return res.status(200).json(newRating);
         }
         catch (error) {
-            return res.status(400).json({ "message": "Could not make rating" });
+            return res.status(400).json({ "error": "Could not make rating" });
         }
 
     }
@@ -307,8 +309,8 @@ export default async function handler(req, res) {
             }
 
             // If post is hidden, cannot edit
-            if (blogExists.hide === true) {
-                return res.status(400).json({ "message": "Cannot delete post that has been hidden by administrator" });
+            if (blogExists.hide === true && !adminV) {
+                return res.status(400).json({ "error": "Cannot delete post that has been hidden by administrator" });
             }
 
             // delete the post
@@ -330,7 +332,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ "message": "Blog post deleted" });
         }
         catch (error) {
-            return res.status(400).json({ "message": "Could not delete blog post" });
+            return res.status(400).json({ "error": "Could not delete blog post" });
         }
 
     }
@@ -347,13 +349,16 @@ export default async function handler(req, res) {
                 userLogID = userV.id;
             }
 
+            let orCheck = [{ hide: false }, { userID: userLogID }]
+            // admin should be able to see anything
+            // if (adminV) {
+            //     orCheck = [{ hide: false }, { hide: true }]
+            // }
+
             const result = await prisma.blog.findUnique({
                 where: {
                     id: id,
-                    OR: [
-                        { hide: false },
-                        { userID: userLogID },
-                    ]
+                    OR: orCheck
                 },
                 include: {
                     difference: false,
@@ -372,17 +377,17 @@ export default async function handler(req, res) {
                 return res.status(200).json(result);
             }
             else {
-                return res.status(400).json({ "message": "Blog post does not exist" });
+                return res.status(400).json({ "error": "Blog post does not exist" });
             }
         }
         catch (error) {
-            return res.status(400).json({ "message": "Could not get blog post" });
+            return res.status(400).json({ "error": "Could not get blog post" });
         }
 
     }
 
     else {
-        return res.status(200).json({ "message": "Method not allowed" });
+        return res.status(400).json({ "error": "Method not allowed" });
     }
 
 }

@@ -50,7 +50,7 @@ export default async function handler(req, res) {
             }
         }
         catch (error) {
-            return res.status(400).json({ "message": "Could not hide blog" });
+            return res.status(400).json({ "error": "Could not hide blog" });
         }
 
     }

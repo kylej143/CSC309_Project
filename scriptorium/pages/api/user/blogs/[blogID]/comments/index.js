@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import token_handler from '@/pages/api/user/protected.js';
+import admin_token_handler from '@/pages/api/admin/protected';
 const prisma = new PrismaClient();
 
 export default async function handler(req, res) {
@@ -7,6 +8,7 @@ export default async function handler(req, res) {
     blogID = Number(blogID);
 
     const userV = await token_handler(req, res);
+    const adminV = await admin_token_handler(req, res);
 
     // WRITE A NEW COMMENT
     if (req.method === "POST") {
@@ -91,7 +93,7 @@ export default async function handler(req, res) {
             }
         }
         catch (error) {
-            return res.status(400).json({ "message": "Could not write comment" });
+            return res.status(400).json({ "error": "Could not write comment" });
         }
 
         return res.status(201).json(newComment);
@@ -112,6 +114,12 @@ export default async function handler(req, res) {
             userLogID = userV.id;
         }
 
+        let orCheck = [{ hide: false }, { userID: userLogID }]
+        // admin should be able to see anything
+        // if (adminV) {
+        //     orCheck = [{ hide: false }, { hide: true }]
+        // }
+
         try {
             let comments;
 
@@ -121,10 +129,7 @@ export default async function handler(req, res) {
                 comments = await prisma.comment.findMany({
                     where: {
                         blogID: blogID,
-                        OR: [
-                            { hide: false },
-                            { userID: userLogID },
-                        ],
+                        OR: orCheck,
                     },
                     orderBy: [
                         { difference: 'desc' },
@@ -148,10 +153,7 @@ export default async function handler(req, res) {
                 comments = await prisma.comment.findMany({
                     where: {
                         blogID: blogID,
-                        OR: [
-                            { hide: false },
-                            { userID: userLogID },
-                        ],
+                        OR: orCheck,
                     },
                     orderBy: [
                         { absDifference: 'asc' },
@@ -173,10 +175,7 @@ export default async function handler(req, res) {
                 comments = await prisma.comment.findMany({
                     where: {
                         blogID: blogID,
-                        OR: [
-                            { hide: false },
-                            { userID: userLogID },
-                        ],
+                        OR: orCheck,
                     },
                     orderBy: [
                         { id: 'desc' },
@@ -196,13 +195,13 @@ export default async function handler(req, res) {
             return res.status(200).json(comments)
         }
         catch (error) {
-            return res.status(400).json({ "message": "Could not get comments" });
+            return res.status(400).json({ "error": "Could not get comments" });
         }
 
     }
 
     else {
-        return res.status(200).json({ "message": "Method not allowed" });
+        return res.status(400).json({ "error": "Method not allowed" });
     }
 
 }

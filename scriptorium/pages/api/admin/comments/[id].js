@@ -52,7 +52,7 @@ export default async function handler(req, res) {
         }
         catch (error) {
             console.log(error);
-            return res.status(400).json({ "message": "Could not hide comment" });
+            return res.status(400).json({ "error": "Could not hide comment" });
         }
 
     }
