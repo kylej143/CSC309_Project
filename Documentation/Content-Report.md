@@ -46,6 +46,13 @@ RETURN  (201 blogs) (403 Forbidden) (503 errors)
 
 HEADERS: (Authorization, Bearer <<replace with access token>>)
 
+QUERY PARAMS (optional)
+
+page: number of page want to display (not providing this sets page to 1)
+
+NOTE:
+Here is an example:  ~/api/admin/sort_blogs?page=1
+
 ```
 #### Sort Comments Based On Number Of Reports In Descending Order (ADMIN)
 
@@ -54,6 +61,13 @@ GET    ~/api/admin/sort_comments
 RETURN  (201 comments) (403 Forbidden) (503 errors)
 
 HEADERS: (Authorization, Bearer <<replace with access token>>)
+
+QUERY PARAMS (optional)
+
+page: number of page want to display (not providing this sets page to 1)
+
+NOTE:
+Here is an example:  ~/api/admin/sort_comments?page=1
 
 ```
 #### Hide Blog Post (ADMIN)
