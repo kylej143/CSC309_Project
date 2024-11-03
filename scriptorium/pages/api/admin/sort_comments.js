@@ -12,7 +12,7 @@ export default async function handler(req, res){
             try{
                 const c = await prisma.comment.findMany({orderBy:{flags: 'desc'}});
                 
-                res.status(200).json({comments: c.map(cc => ({id: cc.id, content: cc.content, flags: cc.flags}))});
+                res.status(201).json({comments: c.map(cc => ({id: cc.id, content: cc.content, flags: cc.flags}))});
             }catch(error){
                 return res.status(503).json({error:'error'});
             }
