@@ -17,12 +17,12 @@ export default async function handler(req, res){
                 const check_comment = await prisma.comment.findUnique({where: { id: cid}});
 
                 if(!check_comment){
-                    return res.status(400).json({error:'Comment does not exist.'});
+                    return res.status(403).json({error:'Comment does not exist.'});
                 }else{
                     const reported = await prisma.commentReport.findUnique({where: {cc: {userID: userID,commentID: cid}}});
 
                     if(reported){
-                        return res.status(400).json({error:'You already reported this comment.'});
+                        return res.status(403).json({error:'You already reported this comment.'});
                     }
 
                     await prisma.commentReport.create({data: {userID: userID, commentID: cid, reason: reason}});
