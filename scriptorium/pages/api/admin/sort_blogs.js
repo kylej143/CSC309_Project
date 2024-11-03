@@ -8,7 +8,7 @@ export default async function handler(req, res){
 
     // 2. sort blogs
     if(req.method === 'GET'){
-        if(adminV){
+        if(adminV[0]){
             try{
                 const b = await prisma.blog.findMany({orderBy:{flags: 'desc'}});
                 
