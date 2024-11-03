@@ -1,16 +1,27 @@
-import token_handler from "./protected";
-
-
 export default async function handler(req, res) {
 
-    let userV = await token_handler(req, res)
+    if (req.method === "GET") {
+        const {username} = req.body
 
-    if (!userV) {
-        return res.status(403).json({error: "403 Forbidden"})
+        try {
+            const userV = await prisma.user.findUnique({
+                where: {
+                    username: username,
+                },
+            })
+
+            return res.status(200).json({"username" : userV.username,
+                "name": userV.name,
+                "email": userV.email,
+                "avatar": userV.avatar,
+                "phoneNumber": userV.phoneNumber,})
+        }
+        catch (error) {
+            return res.status(400).json({error: "username not found"})
+        }
+    } else {
+        return res.status(405).json({ message: "Method not allowed" });
     }
-    return res.status(200).json({"username" : userV.username,
-    "name": userV.name,
-    "email": userV.email,
-    "avatar": userV.avatar,
-    "phoneNumber": userV.phoneNumber,})
+
+
 }
