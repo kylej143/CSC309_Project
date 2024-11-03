@@ -91,7 +91,7 @@ export default async function handler(req, res){
         }
 
         await prisma.codeTemplate.delete({where:{id: parseInt(id)}});
-        return res.status(200).end();
+        return res.status(200).json({"message":"You just successfully deleted the code template."});
     } 
 
     // 4. fork
