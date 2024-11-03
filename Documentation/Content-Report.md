@@ -4,7 +4,7 @@
 
 ```
 POST    ~/api/user/blog_report
-RETURN  (200 reason) (400 errors) (403 Forbidden) (503 errors)
+RETURN  (200 reason) (403 Forbidden) (503 errors)
 
 HEADERS: (Authorization, Bearer <<replace with access token>>)
 
@@ -23,7 +23,7 @@ reason: reason for reporting blog post
 
 ```
 POST    ~/api/user/comment_report
-RETURN  (200 reason) (400 errors) (403 Forbidden) (503 errors)
+RETURN  (200 reason) (403 Forbidden) (503 errors)
 
 HEADERS: (Authorization, Bearer <<replace with access token>>)
 
@@ -42,7 +42,7 @@ reason: reason for reporting comment
 
 ```
 GET    ~/api/admin/sort_blogs
-RETURN  (200 blogs) (403 Forbidden) (503 errors)
+RETURN  (201 blogs) (403 Forbidden) (503 errors)
 
 HEADERS: (Authorization, Bearer <<replace with access token>>)
 
@@ -51,7 +51,7 @@ HEADERS: (Authorization, Bearer <<replace with access token>>)
 
 ```
 GET    ~/api/admin/sort_comments
-RETURN  (200 comments) (403 Forbidden) (503 errors)
+RETURN  (201 comments) (403 Forbidden) (503 errors)
 
 HEADERS: (Authorization, Bearer <<replace with access token>>)
 
