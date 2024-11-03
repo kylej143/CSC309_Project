@@ -8,7 +8,7 @@ export default async function handler(req, res){
 
     // 2. sort comments
     if(req.method === 'GET'){
-        if(adminV){
+        if(adminV[0]){
             try{
                 const c = await prisma.comment.findMany({orderBy:{flags: 'desc'}});
                 
