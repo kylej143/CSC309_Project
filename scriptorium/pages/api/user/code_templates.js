@@ -98,7 +98,7 @@ export default async function handler(req, res){
         const {title, explanation, code, tags} = req.body;
         
         try{
-            const temp = await prisma.codeTemplate.findUnique({where: {id: parseInt(id)}});
+            const temp = await prisma.codeTemplate.findUnique({where: {id: parseInt(id)}, include: {tags: true}});
     
             if(!temp){
                 return res.status(403).json({error: "Code Template does not exist."});
