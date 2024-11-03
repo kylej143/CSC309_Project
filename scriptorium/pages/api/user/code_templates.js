@@ -54,10 +54,21 @@ export default async function handler(req, res){
                 return res.status(403).json({error: "You can only edit your own code templates."});
             }
 
-            const code_template3 = await prisma.codeTemplate.update({
-                where: {id: parseInt(id)}, 
-                data: {title, explanation, code, tags:{set: [], connectOrCreate: tags.map((t) => ({where: {tag: t}, create: {tag: t}}))}}
-            });
+            let edit = {};
+            if(title){
+                edit.title = title;
+            } 
+            if(explanation){
+                edit.explanation = explanation;
+            }
+            if(code){
+                edit.code = code;
+            }
+            if(tags){
+                edit.tags = {set: [], connectOrCreate: tags.map((t) => ({where: {tag: t}, create: {tag: t},}))};
+            }
+
+            const code_template3 = await prisma.codeTemplate.update({where: {id: parseInt(id)}, data: edit});
             return res.status(200).json(code_template3);
         }catch(error){
             return res.status(503).json({error:'error'});
