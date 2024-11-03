@@ -17,12 +17,12 @@ export default async function handler(req, res){
                 const check_blog = await prisma.blog.findUnique({where: { id: bid}});
 
                 if(!check_blog){
-                    return res.status(400).json({error:'Blog does not exist.'});
+                    return res.status(403).json({error:'Blog does not exist.'});
                 }else{
                     const reported = await prisma.blogReport.findUnique({where: {bb: {userID: userID,blogID: bid}}});
 
                     if(reported){
-                        return res.status(400).json({error:'You already reported this blog.'});
+                        return res.status(403).json({error:'You already reported this blog.'});
                     }
 
                     await prisma.blogReport.create({data: {userID: userID, blogID: bid, reason: reason}});
