@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 import token_handler from '@/pages/api/user/protected.js';
-import admin_token_handler from '@/pages/api/admin/protected';
 import { calcUpvoteDifferenceChange } from '@/pages/api/user/blogs/\[blogID\]/index.js';
 const prisma = new PrismaClient();
 
@@ -9,14 +8,13 @@ export default async function handler(req, res) {
     const blogID = Number(req.query.blogID);
     const commentID = Number(req.query.commentID);
     const userV = await token_handler(req, res);
-    const adminV = await admin_token_handler(req, res);
 
     // UPVOTE/DOWNVOTE COMMENTS
     if (req.method === "PUT" && (req.body.upvote || req.body.downvote)) {
 
         // Ensure user is logged in
         if (!userV) {
-            return res.status(400).json({ "error": "Please log in" });
+            return res.status(401).json({ error: "Please log in" });
         }
 
         const userID = Number(userV.id);
@@ -32,7 +30,7 @@ export default async function handler(req, res) {
         });
 
         if (!blogPost) {
-            return res.status(400).json({ "error": "Cannot find comment" });
+            return res.status(404).json({ error: "Cannot find comment" });
         }
 
         // Ensure comment is not hidden
@@ -42,14 +40,14 @@ export default async function handler(req, res) {
             }
         })
 
-        if (checkHidden.hide === true && !adminV) {
-            return res.status(400).json({ "error": "Cannot rate comment" });
+        if (checkHidden.hide === true) {
+            return res.status(404).json({ error: "Cannot find comment" });
         }
 
         // Check valid rating
         const ratings = [true, false]
         if ((req.body.upvote && !ratings.includes(req.body.upvote)) || (req.body.downvote && !ratings.includes(req.body.downvote))) {
-            return res.status(400).json({ "error": "Invalid rating" });
+            return res.status(403).json({ error: "Invalid rating" });
         }
 
         const upvote = (req.body.upvote === true);
@@ -57,7 +55,7 @@ export default async function handler(req, res) {
 
         // Cannot both upvote and downvote a post
         if (upvote && downvote) {
-            return res.status(400).json({ "error": "Cannot upvote and downvote same comment" });
+            return res.status(403).json({ error: "Cannot upvote and downvote same comment" });
         }
 
         // Update or create rating
@@ -152,16 +150,16 @@ export default async function handler(req, res) {
                 return res.status(200).json({ "message": "Removed rating" })
             }
 
-            return res.status(200).json(newRating);
+            return res.status(201).json(newRating);
         }
         catch (error) {
-            return res.status(400).json({ "error": "Could not make rating" })
+            return res.status(403).json({ error: "Could not make rating" })
         }
 
     }
 
     else {
-        return res.status(400).json({ "error": "Method not allowed" });
+        return res.status(403).json({ error: "Method not allowed" });
     }
 
 }

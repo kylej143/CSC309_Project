@@ -15,7 +15,7 @@ export default async function handler(req, res) {
 
         // ensure user is logged in
         if (!userV) {
-            res.status(400).json({ "error": "Please log in" });
+            res.status(401).json({ error: "Please log in" });
         }
 
         let parsedId = Number(userV.id);
@@ -53,7 +53,7 @@ export default async function handler(req, res) {
                 })
 
                 if (!checkParent) {
-                    return res.status(400).json({ "error": "Parent comment does not exist" });
+                    return res.status(404).json({ error: "Parent comment does not exist" });
                 }
 
                 // check if parent comment is in the same blog post
@@ -66,7 +66,7 @@ export default async function handler(req, res) {
                 })
 
                 if (checkParentBlog.id != blogID) {
-                    return res.status(400).json({ "error": "Cannot respond to selected comment" });
+                    return res.status(404).json({ error: "Cannot respond to selected comment" });
                 }
 
                 // write comment
@@ -93,7 +93,7 @@ export default async function handler(req, res) {
             }
         }
         catch (error) {
-            return res.status(400).json({ "error": "Could not write comment" });
+            return res.status(403).json({ error: "Could not write comment" });
         }
 
         return res.status(201).json(newComment);
@@ -116,9 +116,9 @@ export default async function handler(req, res) {
 
         let orCheck = [{ hide: false }, { userID: userLogID }]
         // admin should be able to see anything
-        // if (adminV) {
-        //     orCheck = [{ hide: false }, { hide: true }]
-        // }
+        if (adminV[0]) {
+            orCheck = [{ hide: false }, { hide: true }]
+        }
 
         try {
             let comments;
@@ -195,13 +195,13 @@ export default async function handler(req, res) {
             return res.status(200).json(comments)
         }
         catch (error) {
-            return res.status(400).json({ "error": "Could not get comments" });
+            return res.status(403).json({ error: "Could not get comments" });
         }
 
     }
 
     else {
-        return res.status(400).json({ "error": "Method not allowed" });
+        return res.status(403).json({ error: "Method not allowed" });
     }
 
 }

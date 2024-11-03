@@ -15,10 +15,9 @@ export default async function handler(req, res) {
         const { hide } = req.body;
 
         // Ensure admin is logged in
-        if (!adminV) {
-            res.status(400).json({ "error": "Permission denied" });
+        if (!adminV[0]) {
+            res.status(401).json({ error: "Permission denied" });
         }
-
 
         // hide blog
         try {
@@ -31,7 +30,7 @@ export default async function handler(req, res) {
             });
 
             if (!updatedPost) {
-                return res.status(400).json({ "error": "Blog post does not exist" });
+                return res.status(404).json({ error: "Blog post does not exist" });
             }
 
             await prisma.blog.update({
@@ -50,9 +49,13 @@ export default async function handler(req, res) {
             }
         }
         catch (error) {
-            return res.status(400).json({ "error": "Could not hide blog" });
+            return res.status(403).json({ error: "Could not hide blog" });
         }
 
+    }
+
+    else {
+        return res.status(403).json({ error: "Method not allowed" });
     }
 
 

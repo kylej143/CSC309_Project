@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     if (req.method === "PUT" && !(ratings.includes(req.body.upvote) || ratings.includes(req.body.downvote))) {
         // Ensure user is logged in
         if (!userV) {
-            return res.status(400).json({ "error": "Please log in" });
+            return res.status(401).json({ error: "Please log in" });
         }
 
         const { title, content, tags, templates } = req.body;
@@ -28,17 +28,17 @@ export default async function handler(req, res) {
             });
 
             if (!updatedPost) {
-                return res.status(400).json({ "error": "Blog post does not exist" });
+                return res.status(404).json({ error: "Blog post does not exist" });
             }
 
             // Check that the post actually belongs to the user - else, exit
             if (Number(updatedPost.userID) != Number(userV.id)) {
-                return res.status(400).json({ "error": "No permission to edit the selected blog post" });
+                return res.status(403).json({ error: "No permission to edit the selected blog post" });
             }
 
             // If post is hidden, cannot edit
-            if (updatedPost.hide === true && !adminV) {
-                return res.status(400).json({ "error": "Cannot edit post that has been hidden by administrator" });
+            if (updatedPost.hide === true) {
+                return res.status(403).json({ error: "Cannot edit post that has been hidden by administrator" });
             }
 
             // Make updates
@@ -141,7 +141,7 @@ export default async function handler(req, res) {
         }
 
         catch (error) {
-            return res.status(400).json({ "error": "Could not update blog post" });
+            return res.status(403).json({ error: "Could not update blog post" });
         }
 
     }
@@ -151,7 +151,7 @@ export default async function handler(req, res) {
 
         // Ensure user is logged in
         if (!userV) {
-            return res.status(400).json({ "error": "Please log in" });
+            return res.status(401).json({ error: "Please log in" });
         }
 
         const userID = Number(userV.id);
@@ -164,16 +164,16 @@ export default async function handler(req, res) {
         })
 
         if (!checkHidden) {
-            return res.status(400).json({ "error": "Cannot find blog" });
+            return res.status(404).json({ error: "Cannot find blog" });
         }
 
-        if (checkHidden.hide === true && !adminV) {
-            return res.status(400).json({ "error": "Cannot rate blog" });
+        if (checkHidden.hide === true) {
+            return res.status(404).json({ error: "Cannot find blog" });
         }
 
         // Check valid rating
         if ((req.body.upvote && !ratings.includes(req.body.upvote)) || (req.body.downvote && !ratings.includes(req.body.downvote))) {
-            return res.status(400).json({ "error": "Invalid rating" });
+            return res.status(403).json({ error: "Invalid rating" });
         }
 
         const upvote = (req.body.upvote === true);
@@ -181,7 +181,7 @@ export default async function handler(req, res) {
 
         // Cannot both upvote and downvote a post
         if (upvote && downvote) {
-            return res.status(400).json({ "error": "Cannot upvote and downvote same post" });
+            return res.status(403).json({ error: "Cannot upvote and downvote same post" });
         }
 
         // Update or create rating
@@ -276,10 +276,10 @@ export default async function handler(req, res) {
                 return res.status(200).json({ "message": "Removed rating" });
             }
 
-            return res.status(200).json(newRating);
+            return res.status(201).json(newRating);
         }
         catch (error) {
-            return res.status(400).json({ "error": "Could not make rating" });
+            return res.status(403).json({ error: "Could not make rating" });
         }
 
     }
@@ -289,7 +289,7 @@ export default async function handler(req, res) {
 
         // Ensure user is logged in
         if (!userV) {
-            return res.status(400).json({ "error": "Please log in" });
+            return res.status(401).json({ error: "Please log in" });
         }
 
         try {
@@ -300,17 +300,17 @@ export default async function handler(req, res) {
             })
 
             if (!blogExists) {
-                return res.status(400).json({ "error": "Blog post does not exist" });
+                return res.status(404).json({ error: "Blog post does not exist" });
             }
 
             // Check that the post actually belongs to the user - else, exit
             if (Number(blogExists.userID) != Number(userV.id)) {
-                return res.status(400).json({ "error": "No permission to delete the selected blog post" });
+                return res.status(403).json({ error: "No permission to delete the selected blog post" });
             }
 
             // If post is hidden, cannot edit
-            if (blogExists.hide === true && !adminV) {
-                return res.status(400).json({ "error": "Cannot delete post that has been hidden by administrator" });
+            if (blogExists.hide === true) {
+                return res.status(403).json({ error: "Cannot delete post that has been hidden by administrator" });
             }
 
             // delete the post
@@ -332,7 +332,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ "message": "Blog post deleted" });
         }
         catch (error) {
-            return res.status(400).json({ "error": "Could not delete blog post" });
+            return res.status(403).json({ error: "Could not delete blog post" });
         }
 
     }
@@ -351,9 +351,9 @@ export default async function handler(req, res) {
 
             let orCheck = [{ hide: false }, { userID: userLogID }]
             // admin should be able to see anything
-            // if (adminV) {
-            //     orCheck = [{ hide: false }, { hide: true }]
-            // }
+            if (adminV[0]) {
+                orCheck = [{ hide: false }, { hide: true }]
+            }
 
             const result = await prisma.blog.findUnique({
                 where: {
@@ -363,6 +363,7 @@ export default async function handler(req, res) {
                 include: {
                     difference: false,
                     absDifference: false,
+                    tags: true,
                     templates: true,
                     BlogReport: {
                         include: {
@@ -377,17 +378,17 @@ export default async function handler(req, res) {
                 return res.status(200).json(result);
             }
             else {
-                return res.status(400).json({ "error": "Blog post does not exist" });
+                return res.status(403).json({ error: "Blog post does not exist" });
             }
         }
         catch (error) {
-            return res.status(400).json({ "error": "Could not get blog post" });
+            return res.status(404).json({ error: "Could not get blog post" });
         }
 
     }
 
     else {
-        return res.status(400).json({ "error": "Method not allowed" });
+        return res.status(403).json({ error: "Method not allowed" });
     }
 
 }
