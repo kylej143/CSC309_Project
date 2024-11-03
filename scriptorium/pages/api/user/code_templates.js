@@ -10,9 +10,19 @@ export default async function handler(req, res){
 
     // 2. view, search and 5. search(visitor)
     if(req.method === 'GET' && !(req.query.id || req.query.blogs)){
-        const {title, tags, explanation} = req.query;
+        let page = Number(req.query.page);
+        const pageSize = 10;
         
+        if (!page) {
+            page = 1;
+        }
+        const {title, tags, explanation} = req.query;
+
         let filter = {};
+
+        if(userV){
+            filter.userID = userV.id;
+        }
     
         if(title){
             filter.title = {equals: title};
@@ -29,7 +39,8 @@ export default async function handler(req, res){
     
         try {
             const code_template2 = await prisma.codeTemplate.findMany({where: filter, include: {tags: true}});
-            return res.status(200).json(code_template2);
+            const code_template22 = paginateArray(code_template2, pageSize, page);
+            return res.status(200).json(code_template22);
         }catch(error){
             return res.status(503).json({error:'error'});
         }
@@ -89,7 +100,7 @@ export default async function handler(req, res){
         }
 
         await prisma.codeTemplate.delete({where:{id: parseInt(id)}});
-        return res.status(200).end();
+        return res.status(200).json({"message":"You just successfully deleted the code template."});
     } 
 
     // 4. fork
@@ -159,4 +170,20 @@ export default async function handler(req, res){
         }
     }
 
+}
+
+export function paginateArray(arr, pageSize, pageNumber) {
+    // formulas for getting the start and end index of the page that needs to be printed
+    let startIndex = pageSize * (pageNumber - 1);
+    let endIndex = pageSize * pageNumber - 1;
+
+    // check out of bounds
+    if (endIndex + 1 > arr.length) {
+        endIndex = Math.min(endIndex, arr.length - 1);
+    }
+    if (startIndex + 1 > arr.length) {
+        return [];
+    }
+    // return a slice of the array based on indices
+    return arr.slice(startIndex, endIndex + 1);
 }

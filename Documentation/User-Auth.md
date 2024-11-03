@@ -48,6 +48,17 @@ JSON PARAMS (ASSUME REQUIRED UNLESS OTHERWISE STATED)
 refreshToken: string of the refresh token given from login
 ```
 
+#### Get Info: Get user info
+
+```
+POST    ~/api/user/get_info
+RETURN  (200 user info) (405 Not Allowed) (400 user not found)
+
+JSON PARAMS (ASSUME REQUIRED UNLESS OTHERWISE STATED)
+
+username: username of the user
+```
+
 #### Edit: Edit the user onto the database
 
 ```
