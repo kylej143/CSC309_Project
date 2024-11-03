@@ -12,8 +12,7 @@ export default async function handler(req, res){
             try{
                 const b = await prisma.blog.findMany({orderBy:{flags: 'desc'}});
                 
-                res.status(200).json({numberofblogs: b.length,
-                    blogs: b.map(bb => ({id: bb.id, title: bb.title, flags: bb.flags}))});
+                res.status(200).json({blogs: b.map(bb => ({id: bb.id, title: bb.title, flags: bb.flags}))});
             }catch(error){
                 return res.status(503).json({error:'error'});
             }
