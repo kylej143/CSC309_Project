@@ -89,6 +89,13 @@ export default async function handler(req, res) {
 
         const title = req.query.title;
         const content = req.query.content;
+        let page = Number(req.query.page);
+
+        const pageSize = 10;
+
+        if (!page) {
+            page = 1;
+        }
 
         // create a list of tags from query
         let tags = [];
@@ -235,7 +242,7 @@ export default async function handler(req, res) {
                 })
             }
 
-            return res.status(200).json(result);
+            return res.status(200).json(paginateArray(result, pageSize, page));
         }
         catch (error) {
             return res.status(403).json({ error: "Could not search for blog posts" });
@@ -249,4 +256,20 @@ export default async function handler(req, res) {
 
 
 
+}
+
+export function paginateArray(arr, pageSize, pageNumber) {
+    // formulas for getting the start and end index of the page that needs to be printed
+    let startIndex = pageSize * (pageNumber - 1);
+    let endIndex = pageSize * pageNumber - 1;
+
+    // check out of bounds
+    if (endIndex + 1 > arr.length) {
+        endIndex = Math.min(endIndex, arr.length - 1);
+    }
+    if (startIndex + 1 > arr.length) {
+        return [];
+    }
+    // return a slice of the array based on indices
+    return arr.slice(startIndex, endIndex + 1);
 }

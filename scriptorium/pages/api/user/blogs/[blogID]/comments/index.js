@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import token_handler from '@/pages/api/user/protected.js';
 import admin_token_handler from '@/pages/api/admin/protected';
+import { paginateArray } from '@/pages/api/user/blogs/index.js';
 const prisma = new PrismaClient();
 
 export default async function handler(req, res) {
@@ -103,8 +104,16 @@ export default async function handler(req, res) {
     // SORT COMMENTS
     else if (req.method === "GET") {
         let sortMethod = req.query.sort;
+        let page = req.query.page;
+
         if (sortMethod !== "valued" && sortMethod !== "controversial" && sortMethod !== "recent") {
             sortMethod = "valued"
+        }
+
+        const pageSize = 10;
+
+        if (!page) {
+            page = 1;
         }
 
         // ensures that if the comment is hidden, it will not be visible
@@ -192,7 +201,7 @@ export default async function handler(req, res) {
                     }
                 })
             }
-            return res.status(200).json(comments)
+            return res.status(200).json(paginateArray(comments, pageSize, page))
         }
         catch (error) {
             return res.status(403).json({ error: "Could not get comments" });
