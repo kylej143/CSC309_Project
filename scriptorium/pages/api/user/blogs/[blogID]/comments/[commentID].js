@@ -14,7 +14,7 @@ export default async function handler(req, res) {
 
         // Ensure user is logged in
         if (!userV) {
-            return res.status(400).json({ "error": "Please log in" });
+            return res.status(401).json({ error: "Please log in" });
         }
 
         const userID = Number(userV.id);
@@ -30,13 +30,24 @@ export default async function handler(req, res) {
         });
 
         if (!blogPost) {
-            return res.status(400).json({ "error": "Cannot find comment" });
+            return res.status(404).json({ error: "Cannot find comment" });
+        }
+
+        // Ensure comment is not hidden
+        const checkHidden = await prisma.comment.findUnique({
+            where: {
+                id: commentID,
+            }
+        })
+
+        if (checkHidden.hide === true) {
+            return res.status(404).json({ error: "Cannot find comment" });
         }
 
         // Check valid rating
         const ratings = [true, false]
         if ((req.body.upvote && !ratings.includes(req.body.upvote)) || (req.body.downvote && !ratings.includes(req.body.downvote))) {
-            return res.status(400).json({ "message": "Invalid rating" });
+            return res.status(403).json({ error: "Invalid rating" });
         }
 
         const upvote = (req.body.upvote === true);
@@ -44,7 +55,7 @@ export default async function handler(req, res) {
 
         // Cannot both upvote and downvote a post
         if (upvote && downvote) {
-            return res.status(200).json({ "message": "Cannot upvote and downvote same comment" });
+            return res.status(403).json({ error: "Cannot upvote and downvote same comment" });
         }
 
         // Update or create rating
@@ -139,16 +150,16 @@ export default async function handler(req, res) {
                 return res.status(200).json({ "message": "Removed rating" })
             }
 
-            return res.status(200).json(newRating);
+            return res.status(201).json(newRating);
         }
         catch (error) {
-            return res.status(400).json({ "message": "Could not make rating" })
+            return res.status(403).json({ error: "Could not make rating" })
         }
 
     }
 
     else {
-        return res.status(200).json({ "message": "Method not allowed" });
+        return res.status(403).json({ error: "Method not allowed" });
     }
 
 }

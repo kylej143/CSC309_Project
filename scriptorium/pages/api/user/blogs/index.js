@@ -1,18 +1,20 @@
 import { PrismaClient } from '@prisma/client';
 import token_handler from '@/pages/api/user/protected.js';
+import admin_token_handler from '@/pages/api/admin/protected';
 const prisma = new PrismaClient();
 
 
 export default async function handler(req, res) {
 
     const userV = await token_handler(req, res);
+    const adminV = await admin_token_handler(req, res);
 
     // CREATING BLOG POSTS
     if (req.method === "POST") {
 
         // Ensure user is logged in
         if (!userV) {
-            res.status(400).json({ "error": "Please log in" });
+            res.status(401).json({ error: "Please log in" });
         }
 
         let parsedId = Number(userV.id);
@@ -78,7 +80,7 @@ export default async function handler(req, res) {
         }
 
         catch (error) {
-            return res.status(400).json({ "message": "Could not create blog post" });
+            return res.status(403).json({ error: "Could not create blog post" });
         }
     }
 
@@ -116,6 +118,37 @@ export default async function handler(req, res) {
             sortMethod = "valued"
         }
 
+        // ensures that if the blog post is hidden, it will not show
+        // except to the original author
+        let userLogID = -1;
+        if (userV) {
+            userLogID = userV.id;
+        }
+
+        let orCheck = [{ hide: false }, { userID: userLogID }]
+
+        // admin should be able to see anything
+        if (adminV[0]) {
+            orCheck = [{ hide: false }, { hide: true }]
+        }
+
+        let andCheck = [
+            {
+                AND: tags.map((t) => ({
+                    tags: {
+                        some: { tag: t }
+                    }
+                }))
+            },
+            {
+                AND: templates.map((c) => ({
+                    templates: {
+                        some: { id: c }
+                    }
+                }))
+            },
+        ];
+
         // filtered search
         try {
 
@@ -127,22 +160,8 @@ export default async function handler(req, res) {
                     where: {
                         title: { contains: (title || ''), },
                         content: { contains: (content || ''), },
-                        AND: [
-                            {
-                                AND: tags.map((t) => ({
-                                    tags: {
-                                        some: { tag: t }
-                                    }
-                                }))
-                            },
-                            {
-                                AND: templates.map((c) => ({
-                                    templates: {
-                                        some: { id: c }
-                                    }
-                                }))
-                            },
-                        ]
+                        OR: orCheck,
+                        AND: andCheck,
                     },
                     orderBy: [
                         { difference: 'desc' },
@@ -151,7 +170,14 @@ export default async function handler(req, res) {
                     include: {
                         difference: false,
                         absDifference: false,
+                        tags: true,
                         templates: true,
+                        BlogReport: {
+                            include: {
+                                userID: false,
+                                blogID: false,
+                            }
+                        }
                     }
                 })
             }
@@ -162,22 +188,8 @@ export default async function handler(req, res) {
                     where: {
                         title: { contains: (title || ''), },
                         content: { contains: (content || ''), },
-                        AND: [
-                            {
-                                AND: tags.map((t) => ({
-                                    tags: {
-                                        some: { tag: t }
-                                    }
-                                }))
-                            },
-                            {
-                                AND: templates.map((c) => ({
-                                    templates: {
-                                        some: { id: c }
-                                    }
-                                }))
-                            },
-                        ],
+                        OR: orCheck,
+                        AND: andCheck,
                     },
                     orderBy: [
                         { absDifference: 'asc' },
@@ -186,7 +198,14 @@ export default async function handler(req, res) {
                     include: {
                         difference: false,
                         absDifference: false,
+                        tags: true,
                         templates: true,
+                        BlogReport: {
+                            include: {
+                                userID: false,
+                                blogID: false,
+                            }
+                        }
                     }
                 })
             }
@@ -195,22 +214,8 @@ export default async function handler(req, res) {
                     where: {
                         title: { contains: (title || ''), },
                         content: { contains: (content || ''), },
-                        AND: [
-                            {
-                                AND: tags.map((t) => ({
-                                    tags: {
-                                        some: { tag: t }
-                                    }
-                                }))
-                            },
-                            {
-                                AND: templates.map((c) => ({
-                                    templates: {
-                                        some: { id: c }
-                                    }
-                                }))
-                            },
-                        ],
+                        OR: orCheck,
+                        AND: andCheck,
                     },
                     orderBy: [
                         { id: 'desc' }
@@ -218,7 +223,14 @@ export default async function handler(req, res) {
                     include: {
                         difference: false,
                         absDifference: false,
+                        tags: true,
                         templates: true,
+                        BlogReport: {
+                            include: {
+                                userID: false,
+                                blogID: false,
+                            }
+                        }
                     }
                 })
             }
@@ -226,13 +238,13 @@ export default async function handler(req, res) {
             return res.status(200).json(result);
         }
         catch (error) {
-            return res.status(400).json({ "message": "Could not search for blog posts" });
+            return res.status(403).json({ error: "Could not search for blog posts" });
         }
 
     }
 
     else {
-        return res.status(200).json({ "message": "Method not allowed" });
+        return res.status(403).json({ error: "Method not allowed" });
     }
 
 
