@@ -72,7 +72,7 @@ tags: list of tags, and tags are strings
 
 ```
 DELETE    ~/api/user/code_templates?id=
-RETURN  (200 Code Template) (403 Forbidden)
+RETURN  (200 no message) (403 Forbidden)
 
 HEADERS: (Authorization, Bearer <<replace with access token>>)
 
