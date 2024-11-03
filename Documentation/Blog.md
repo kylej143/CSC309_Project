@@ -83,6 +83,8 @@ templates: a template id (number)
 
 sort: sort method - can be valued, controversial, or recent
 
+page: page number, default is 1
+
 NOTE:
 Each tag and template is specified separately (e.g. ~/api/user/blogs?tags=javascript&tags=react&tags=hello).
 Blogs that have been hidden by the administrator will not appear, except to the author and administrator when they are logged in.
@@ -96,25 +98,6 @@ GET    ~/api/user/blogs/[blogID]
 RETURN  (200 OK) (403 Forbidden) (404 Not Found)
 
 HEADERS (OPTIONAL): (Authorization, Bearer <<replace with access token>>)
-
-NOTE:
-A blog that has been hidden by the administrator will not appear, except to the author and administrator when they are logged in.
-
-```
-
-#### Get Associated Blog Posts From Code Template (VISITOR/USER)
-
-```
-GET    ~/api/user/code_templates
-RETURN  (200 OK) (403 Forbidden) (404 Not Found)
-
-HEADERS (OPTIONAL): (Authorization, Bearer <<replace with access token>>)
-
-QUERY PARAMS
-
-id: id of code template
-
-blogs: true
 
 NOTE:
 A blog that has been hidden by the administrator will not appear, except to the author and administrator when they are logged in.
@@ -140,7 +123,7 @@ Optional parameters:
 parentCommentID: ID of existing comment to respond to. This comment must also be in the blog specified by [blogID].
 ```
 
-#### Sort Comments of Blog (VISITOR/USER)
+#### Get and Sort Comments of Blog (VISITOR/USER)
 
 ```
 GET    ~/api/user/blogs/[blogID]/comments
@@ -148,9 +131,11 @@ RETURN  (200 OK) (403 Forbidden)
 
 HEADERS (OPTIONAL): (Authorization, Bearer <<replace with access token>>)
 
-QUERY PARAMS
+QUERY PARAMS (optional)
 
 sort: sort method - can be valued, controversial, or recent
+
+page: page number, default is 1
 
 NOTE:
 Comments that have been hidden by the administrator will not appear, except to the author and administrator when they are logged in.

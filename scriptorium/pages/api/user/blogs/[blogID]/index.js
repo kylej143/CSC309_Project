@@ -9,7 +9,7 @@ export default async function handler(req, res) {
 
     const userV = await token_handler(req, res);
     const adminV = await admin_token_handler(req, res);
-    const ratings = [true, false]
+    const ratings = [true, false];
 
     // EDITING BLOG POSTS
     if (req.method === "PUT" && !(ratings.includes(req.body.upvote) || ratings.includes(req.body.downvote))) {
@@ -137,7 +137,21 @@ export default async function handler(req, res) {
                 })
             }
 
-            return res.status(200).json(updatedPost);
+            const updatedPostID = updatedPost.id;
+            const updatedPostSelect = await prisma.blog.findUnique({
+                where: {
+                    id: updatedPostID,
+                },
+                include: {
+                    difference: false,
+                    absDifference: false,
+                    tags: true,
+                    templates: true
+                }
+            })
+
+            return res.status(201).json(updatedPostSelect);
+
         }
 
         catch (error) {
@@ -202,6 +216,12 @@ export default async function handler(req, res) {
             let diffChange = 0;
 
             if (existingRating) {
+
+                // check that you aren't making the same rating again
+                if ((existingRating.upvote === upvote) && (existingRating.downvote === downvote)) {
+                    return res.status(403).json({ error: "You have already made this rating" });
+                }
+
                 // false, true --> false, false
                 // upvotechange = 0 - 0 = 0
                 // downvotechange = 0 - 1 = -1               
@@ -210,6 +230,11 @@ export default async function handler(req, res) {
                 diffChange = calcUpvoteDifferenceChange(existingRating.upvote, existingRating.downvote, upvote, downvote);
             }
             else {
+
+                if ((upvote === false) && (downvote === false)) {
+                    return res.status(403).json({ error: "You have already made this rating" });
+                }
+                
                 upvoteChange = Number(upvote);
                 downvoteChange = Number(downvote);
                 diffChange = calcUpvoteDifferenceChange(false, false, upvote, downvote);

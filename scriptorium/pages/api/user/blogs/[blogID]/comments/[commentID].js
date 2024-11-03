@@ -8,9 +8,10 @@ export default async function handler(req, res) {
     const blogID = Number(req.query.blogID);
     const commentID = Number(req.query.commentID);
     const userV = await token_handler(req, res);
+    const ratings = [true, false];
 
     // UPVOTE/DOWNVOTE COMMENTS
-    if (req.method === "PUT" && (req.body.upvote || req.body.downvote)) {
+    if (req.method === "PUT" && (ratings.includes(req.body.upvote) || ratings.includes(req.body.downvote))) {
 
         // Ensure user is logged in
         if (!userV) {
@@ -76,6 +77,12 @@ export default async function handler(req, res) {
             let diffChange = 0;
 
             if (existingRating) {
+
+                // check that you aren't making the same rating again
+                if ((existingRating.upvote === upvote) && (existingRating.downvote === downvote)) {
+                    return res.status(403).json({ error: "You have already made this rating" });
+                }
+
                 // false, true --> false, false
                 // upvotechange = 0 - 0 = 0
                 // downvotechange = 0 - 1 = -1         
@@ -84,6 +91,11 @@ export default async function handler(req, res) {
                 diffChange = calcUpvoteDifferenceChange(existingRating.upvote, existingRating.downvote, upvote, downvote);
             }
             else {
+
+                if ((upvote === false) && (downvote === false)) {
+                    return res.status(403).json({ error: "You have already made this rating" });
+                }
+
                 upvoteChange = Number(upvote);
                 downvoteChange = Number(downvote);
                 diffChange = calcUpvoteDifferenceChange(false, false, upvote, downvote);

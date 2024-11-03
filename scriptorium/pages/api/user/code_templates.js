@@ -159,38 +159,4 @@ export default async function handler(req, res){
         }
     }
 
-    // 5. GET BLOG POSTS THAT MENTION TEMPLATE
-    if (req.query.id && req.query.blogs && req.method === 'GET') {
-
-        const id = Number(req.query.id);
-
-        try {
-
-            // ensure that template exists
-            const templateResult = await prisma.codeTemplate.findUnique({
-                where: {
-                    id,
-                }
-            })
-
-            if (!templateResult) {
-                return res.status(404).json({ error: "Template does not exist" });
-            }
-
-            // get associated blog posts
-            const result = await prisma.blog.findMany({
-                where: {
-                    templates: {
-                        some: { id: id },
-                    }
-                }
-            })
-
-            return res.status(200).json(result);
-        }
-        catch (error) {
-            return res.status(403).json({ error: "Could not get associated blog posts" });
-        }
-
-    }
 }

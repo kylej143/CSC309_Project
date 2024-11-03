@@ -76,7 +76,21 @@ export default async function handler(req, res) {
                     }
                 })
             }
-            return res.status(201).json(newPost);
+
+            const newPostID = newPost.id;
+            const selectnewPost = await prisma.blog.findUnique({
+                where: {
+                    id: newPostID,
+                },
+                include: {
+                    difference: false,
+                    absDifference: false,
+                    tags: true,
+                    templates: true
+                }
+            })
+
+            return res.status(201).json(selectnewPost);
         }
 
         catch (error) {
