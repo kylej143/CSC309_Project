@@ -13,7 +13,9 @@ export default async function handler(req, res){
         const {title, tags, explanation} = req.query;
         
         let filter = {};
-    
+        if(userV){
+            filter.userID = userV.id;
+        }
         if(title){
             filter.title = {equals: title};
         }
