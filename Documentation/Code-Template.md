@@ -32,6 +32,8 @@ HEADERS (OPTIONAL): (Authorization, Bearer <<replace with access token>>)
 
 QUERY PARAMS (all optional)
 
+page: number of page want to display (not providing this sets page to 1)
+
 title: title of code template
 
 code: code of code template
@@ -39,7 +41,7 @@ code: code of code template
 tags: list of tags, and tags are strings
 
 NOTE:
-Here are the example usages: ~/api/user/code_templates?title=computer, ~/api/user/code_templates?tags=Python, ~/api/user/code_templates?explanation=I+am+happy
+Here are the example usages: ~/api/user/code_templates?page=1&title=computer, ~/api/user/code_templates?tags=Python, ~/api/user/code_templates?explanation=I+am+happy
 "I am happy" should be I+am+happy
 
 ```
@@ -72,7 +74,7 @@ tags: list of tags, and tags are strings
 
 ```
 DELETE    ~/api/user/code_templates?id=
-RETURN  (200 no message) (403 Forbidden)
+RETURN  (200 message) (403 Forbidden)
 
 HEADERS: (Authorization, Bearer <<replace with access token>>)
 
