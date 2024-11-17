@@ -1,22 +1,21 @@
 import React, {useEffect} from "react";
 import { useState } from 'react';
+import Navigation from '../components/Navigation';
 
 
 export default function Login() {
 
-  const [accessToken, setAccessToken] = useState("");
-  const [refreshToken, setRefreshToken] = useState("");
+    const [accessToken, setAccessToken] = useState("");
+    const [refreshToken, setRefreshToken] = useState("");
 
+    useEffect(() => {
+    setAccessToken(String(localStorage.getItem("accessToken")));
+    setRefreshToken(String(localStorage.getItem("refreshToken")));
+    }, []);
 
-  useEffect(() => {
-    // @ts-ignore
-    setAccessToken(localStorage.getItem("accessToken"));
-    // @ts-ignore
-    setRefreshToken(localStorage.getItem("refreshToken"));
-  }, []);
-
-  return (
+    return (
       <>
+          <Navigation></Navigation>
           <main>
               <div className="flex items-center bg-green-100 px-10 py-10 gap-5 text-green-700 text-2xl ">
                   <div className="flex-1"/>
@@ -36,7 +35,7 @@ export default function Login() {
           </main>
 
       </>
-  );
+    );
 
 
 }
