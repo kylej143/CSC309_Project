@@ -104,6 +104,6 @@ export default async function handler(req, res) {
         return res.status(201).json({message: "user successfully created"})
 
     } else {
-        return res.status(405).json({ message: "Method not allowed" });
+        return res.status(405).json({ error: "Method not allowed" });
     }
 }

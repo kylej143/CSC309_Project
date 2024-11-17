@@ -40,7 +40,7 @@ export default async function handler(req, res) {
             await fs.writeFile(`run_folder/code${file_name}.${ext}`, code, (err) => {if (err) throw err;})
         }
         catch (e) {
-            return res.status(500).json({ message: "Failed duplicating code" });
+            return res.status(500).json({ error: "Failed duplicating code" });
         }
 
         if (language === "python" || language === "javascript") {
@@ -113,7 +113,7 @@ export default async function handler(req, res) {
         }
 
     } else {
-        return res.status(405).json({ message: "Method not allowed" });
+        return res.status(405).json({ error: "Method not allowed" });
     }
 }
 
