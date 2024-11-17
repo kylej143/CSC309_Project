@@ -1,7 +1,7 @@
 import React, {useEffect} from "react";
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-
+import Navigation from '../components/Navigation';
 
 
 export default function Login() {
@@ -52,6 +52,7 @@ export default function Login() {
 
     return (
         <>
+            <Navigation></Navigation>
             <main>
                 <div className="flex items-center bg-green-100 px-10 py-10 gap-5">
                     <div className="flex-1"/>
