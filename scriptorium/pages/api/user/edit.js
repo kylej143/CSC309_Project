@@ -15,6 +15,14 @@ export default async function handler(req, res) {
 
         let { username, password, name, email, avatar, phoneNumber } = req.body
 
+        if (username === "") username = undefined;
+        if (password === "") password = undefined;
+        if (name === "") name = undefined;
+        if (email === "") email = undefined;
+        if (avatar === "") avatar = undefined;
+        if (phoneNumber === "") phoneNumber = undefined;
+
+
         if (username) {
             try {
                 if (await prisma.user.findUnique({
@@ -121,10 +129,10 @@ export default async function handler(req, res) {
             },
             data: {
                 username,
-                password: await hashPassword(password),
+                password: Boolean(password)? await hashPassword(password): undefined,
                 name,
                 email,
-                avatar: avatar,
+                avatar,
                 phoneNumber
             }
         })
@@ -132,8 +140,8 @@ export default async function handler(req, res) {
             return res.status(400).json({error: "update failed"})
         }
 
-        const token = generateToken({ userId: userV.id, username: username });
-        const refreshToken = generateRefreshToken( { userId: userV.id, username: username })
+        const token = generateToken({ userId: userV.id, username: new_user.username });
+        const refreshToken = generateRefreshToken( { userId: userV.id, username: new_user.username })
         return res.status(200).json({
             "accessToken": token, "refreshToken": refreshToken,
         });

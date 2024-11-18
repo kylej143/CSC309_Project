@@ -1,9 +1,13 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import Navigation from '../../components/Navigation';
 import Link from "next/link";
+import { useRouter } from 'next/router'
 
 
 export default function Register() {
+
+    const router = useRouter()
+    const { slug } = router.query
 
     const [username, setUsername] = useState("");
     const [name, setName] = useState("");
@@ -11,15 +15,9 @@ export default function Register() {
     const [avatar, setAvatar] = useState(0);
     const [phoneNumber, setPhoneNumber] = useState(0);
 
-    const [auth, setAuth] = useState("");
-    useEffect(() => {
-        setAuth("Bearer " + String(localStorage.getItem("accessToken")));
-    }, []);
-
     function GetUser() {
-        fetch("/api/user/protected_test", {
-            method: "POST",
-            headers: {Authorization: auth},
+        fetch("/api/user/get_info?username=" + slug, {
+            method: "GET",
         }).then(r => r.json()).then(
             (res : {username: String, name: String, email: String, avatar: Number, phoneNumber: Number}) => {
                 setUsername(String(res.username))
@@ -38,7 +36,7 @@ export default function Register() {
             <main>
                 <div className="flex items-center bg-green-100 px-10 py-10 gap-5 text-green-700 text-2xl ">
                     <div className="flex-1"/>
-                    <p>View My Profile</p>
+                    <p>View {username}'s Profile</p>
                     <div className="flex-1"/>
                 </div>
                 <div className="flex items-center bg-green-100 px-10 gap-5 ">
@@ -64,12 +62,6 @@ export default function Register() {
                 <div className="flex items-center bg-green-100 px-10 gap-5 ">
                     <div className="flex-1"/>
                     <p>Phone Number: {String(phoneNumber)}</p>
-                    <div className="flex-1"/>
-                </div>
-                <div className="flex items-center bg-green-100 py-2 px-10 gap-5 ">
-                    <div className="flex-1"/>
-                    <Link className="border-2 bg-green-400 border-green-700 hover:bg-amber-500"
-                          href="/edit">Edit</Link>
                     <div className="flex-1"/>
                 </div>
             </main>
