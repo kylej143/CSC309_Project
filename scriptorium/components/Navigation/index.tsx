@@ -16,6 +16,7 @@ export default function Navigation() {
             <nav className="flex flex-row bg-green-400 font-bold text-black px-5 py-3 gap-2 flex-wrap">
                 <Link href="/">Home</Link>
                 <div className="flex-1"/>
+                <Link href="/run">Start Coding!</Link>
                 {isLoggedIn? null : <Link href="/register">Register</Link>}
                 {isLoggedIn? <Link href="/user">Profile</Link> : null}
                 {isLoggedIn? <Link onClick={() => localStorage.clear()} href="/login">Logout</Link> : <Link href="/login">Login</Link>}
