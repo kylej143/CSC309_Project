@@ -12,3 +12,10 @@ For the user's own, only available when logged in. Has basic user information.
 The user can access the edit button from the profile.
 Visitors can look at other people's profile and see non-private information.
 Through the route /user/{username}.
+
+### Edit
+Through the user's own profile, this page can be accessed.
+When the user is edited, it updates the refresh/access token to new ones.
+
+### Refresh token
+In _app, there is an infinite loop that will refresh the access token every 500 seconds (~8.3 minutes).
