@@ -1,7 +1,7 @@
 import React, {useEffect} from "react";
 import { useState } from 'react';
 import Navigation from "../components/Navigation";
-
+// got basic style and logic help by gpt
 interface codetemplate{
   id: number;
   title: string;
