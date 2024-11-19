@@ -5,10 +5,11 @@ import Navigation from '@/components/Navigation';
 export default function Blog() {
 
     const router = useRouter();
+    const { blogID } = router.query
     const [blog, setBlog] = useState([]);
 
     const fetchBlog = async () => {
-        const response = await fetch(`/api/user/blogs/${router.query.blogID}`);
+        const response = await fetch(`/api/user/blogs/${blogID}`);
         const data = await response.json();
         setBlog(data);
     };

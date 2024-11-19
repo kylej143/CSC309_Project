@@ -170,6 +170,28 @@ export default async function handler(req, res) {
             },
         ];
 
+        let includeComponents = {
+            user: {
+                include: {
+                    password: false,
+                    name: false,
+                    email: false,
+                    phoneNumber: false,
+                    role: false,
+                }
+            },
+            difference: false,
+            absDifference: false,
+            tags: true,
+            templates: true,
+            BlogReport: {
+                include: {
+                    userID: false,
+                    blogID: false,
+                }
+            }
+        }
+
         // filtered search
         try {
 
@@ -188,18 +210,7 @@ export default async function handler(req, res) {
                         { difference: 'desc' },
                         { up: 'desc' },
                     ],
-                    include: {
-                        difference: false,
-                        absDifference: false,
-                        tags: true,
-                        templates: true,
-                        BlogReport: {
-                            include: {
-                                userID: false,
-                                blogID: false,
-                            }
-                        }
-                    }
+                    include: includeComponents
                 })
             }
             else if (sortMethod === "controversial") {
@@ -216,18 +227,7 @@ export default async function handler(req, res) {
                         { absDifference: 'asc' },
                         { up: 'desc' },
                     ],
-                    include: {
-                        difference: false,
-                        absDifference: false,
-                        tags: true,
-                        templates: true,
-                        BlogReport: {
-                            include: {
-                                userID: false,
-                                blogID: false,
-                            }
-                        }
-                    }
+                    include: includeComponents
                 })
             }
             else {
@@ -241,18 +241,7 @@ export default async function handler(req, res) {
                     orderBy: [
                         { id: 'desc' }
                     ],
-                    include: {
-                        difference: false,
-                        absDifference: false,
-                        tags: true,
-                        templates: true,
-                        BlogReport: {
-                            include: {
-                                userID: false,
-                                blogID: false,
-                            }
-                        }
-                    }
+                    include: includeComponents
                 })
             }
 

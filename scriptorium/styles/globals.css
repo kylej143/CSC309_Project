@@ -36,6 +36,14 @@ body {
   @apply border-2 p-2 rounded-md;
 }
 
+.tagItem {
+  @apply border-2 p-1 rounded-md bg-white has-[:checked]:bg-gray-400 has-[:checked]:text-white;
+}
+
+.tagItem:hover {
+  @apply bg-gray-400 text-white;
+}
+
 .blogItemTitle {
   @apply font-bold;
 }
