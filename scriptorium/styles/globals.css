@@ -25,3 +25,21 @@ body {
     text-wrap: balance;
   }
 }
+
+/* blogs (temporary) */
+
+.blogSearchTitle {
+  @apply text-xl font-bold mb-2;
+}
+
+.blogItem {
+  @apply border-2 p-2 rounded-md;
+}
+
+.blogItemTitle {
+  @apply font-bold;
+}
+
+.blogSearch {
+  @apply border-2;
+}
