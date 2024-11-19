@@ -4,7 +4,8 @@ import prisma from "@/utils/db"
 export default async function handler(req, res) {
 
     if (req.method === "GET") {
-        const {username} = req.body
+        const username = req.query.username
+
 
         try {
             const userV = await prisma.user.findUnique({

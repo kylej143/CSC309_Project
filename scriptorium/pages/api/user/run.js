@@ -2,7 +2,7 @@ import { exec } from 'child_process';
 import fs from "node:fs";
 
 export default async function handler(req, res) {
-    if (req.method === "GET") {
+    if (req.method === "POST") {
 
         let { stdin, code, language, className } = req.body
         const file_name = Date.now().toString(36) + Math.random().toString(36).substr(2)
@@ -30,7 +30,7 @@ export default async function handler(req, res) {
                 ext = "c"
                 compiler = "gcc"
                 break;
-            case "c++":
+            case "cpp":
                 ext = "cpp"
                 compiler = "g++"
                 break;
