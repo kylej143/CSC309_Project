@@ -19,6 +19,7 @@ export default function Navigation() {
                 <Link href="/blogs">Blogs</Link>
                 <div className="flex-1" />
                 <Link href="/run">Start Coding!</Link>
+                {isLoggedIn ? <Link href="/blogs/create-blog" >Create Blog</Link> : null}
                 {isLoggedIn ? null : <Link href="/register">Register</Link>}
                 {isLoggedIn ? <Link href="/user">Profile</Link> : null}
                 {isLoggedIn ? <Link onClick={() => localStorage.clear()} href="/login">Logout</Link> : <Link href="/login">Login</Link>}
