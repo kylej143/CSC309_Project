@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useRouter } from 'next/router'
 import Navigation from '@/components/Navigation';
 
 export default function Blogs() {
@@ -11,6 +12,8 @@ export default function Blogs() {
     const [contentSearch, setContentSearch] = useState("");
     const [tagFilter, setTagFilter] = useState("");
     const [goSearch, setGoSearch] = useState<boolean>(false);
+
+    const router = useRouter();
 
     // get blogs from api
     const fetchBlogs = async () => {
@@ -157,7 +160,7 @@ export default function Blogs() {
                         id: number; title: string; content: string; userID: number;
                         user: { id: number; username: string; avatar: number }; tags: { id: number; tag: string }[]
                     }) => (
-                        <div key={blog.id} className="blogItem">
+                        <div key={blog.id} className="blogItem" onClick={(e) => router.push(`/blogs/${blog.id}`)}>
                             <p className="blogItemTitle">{blog.title}</p>
                             <p className="blogItemContent">{blog.content}</p>
                             <div className="blogTags flex flex-row gap-2">

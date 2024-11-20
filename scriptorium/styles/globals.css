@@ -36,6 +36,10 @@ body {
   @apply border-2 p-2 rounded-md;
 }
 
+.blogItem:hover {
+  @apply shadow-md shadow-gray-400;
+}
+
 .tagItem {
   @apply border-2 p-1 rounded-md bg-white has-[:checked]:bg-gray-400 has-[:checked]:text-white;
 }

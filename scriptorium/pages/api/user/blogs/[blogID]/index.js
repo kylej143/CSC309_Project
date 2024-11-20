@@ -234,7 +234,7 @@ export default async function handler(req, res) {
                 if ((upvote === false) && (downvote === false)) {
                     return res.status(403).json({ error: "You have already made this rating" });
                 }
-                
+
                 upvoteChange = Number(upvote);
                 downvoteChange = Number(downvote);
                 diffChange = calcUpvoteDifferenceChange(false, false, upvote, downvote);
@@ -380,23 +380,34 @@ export default async function handler(req, res) {
                 orCheck = [{ hide: false }, { hide: true }]
             }
 
+            let includeComponents = {
+                user: {
+                    include: {
+                        password: false,
+                        name: false,
+                        email: false,
+                        phoneNumber: false,
+                        role: false,
+                    }
+                },
+                difference: false,
+                absDifference: false,
+                tags: true,
+                templates: true,
+                BlogReport: {
+                    include: {
+                        userID: false,
+                        blogID: false,
+                    }
+                }
+            }
+
             const result = await prisma.blog.findUnique({
                 where: {
                     id: id,
                     OR: orCheck
                 },
-                include: {
-                    difference: false,
-                    absDifference: false,
-                    tags: true,
-                    templates: true,
-                    BlogReport: {
-                        include: {
-                            userID: false,
-                            blogID: false,
-                        }
-                    }
-                }
+                include: includeComponents,
             })
 
             if (result) {
