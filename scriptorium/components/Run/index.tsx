@@ -1,20 +1,23 @@
-import {useState} from "react";
+import {useState, useEffect} from "react";
+import { useRouter } from "next/router";
 import React from "react";
 // @ts-ignore
 import SyntaxHighlighter from 'react-syntax-highlighter';
 // @ts-ignore
-import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import { docco } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
 
 
 export default function Run() {
-
-    const [code, setCode] = useState("");
+    const router = useRouter();
+    const { code: qc } = router.query;
+    const [code, setCode] = useState<string>("");
     const [language, setLanguage] = useState("javascript");
     const [className, setClassName] = useState("");
     const [stdin, setStdin] = useState("");
     const [stdout, setStdout] = useState("");
     const [stderr, setStderr] = useState("");
 
+    useEffect(() => {if(qc){setCode(qc as string);}},[qc]);
 
     async function RunCode() {
         let response = await fetch("/api/user/run", {
