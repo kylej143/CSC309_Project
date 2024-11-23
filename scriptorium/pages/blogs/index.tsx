@@ -2,15 +2,67 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from 'next/router'
 import Navigation from '@/components/Navigation';
 
+export interface Blog {
+    id: number;
+    title: string;
+    content: string;
+    flags: number;
+    up: number;
+    down: number;
+    hide: boolean;
+    userID: number;
+    user: { id: number; username: string; avatar: number };
+    tags: { id: number; tag: string }[];
+    templates: [];
+    BlogReport: [];
+}
+
+export const defaultBlog: Blog = {
+    id: 0,
+    title: "", content: "",
+    flags: 0, up: 0, down: 0, hide: false, userID: 0,
+    user: { id: 0, username: "", avatar: 0 },
+    tags: [],
+    templates: [],
+    BlogReport: []
+}
+
+export function addTags(tagArray: { id: number, tag: string }[], newTag: { id: number, tag: string }) {
+    return tagArray.concat([newTag]);
+}
+
+export function removeTags(tagArray: { id: number, tag: string }[], removeTagID: number) {
+    return tagArray.filter((t) => t.id != removeTagID);
+}
+
+export function getID(id: number) {
+    return `tag${id}`;
+}
+
+export function checkTagInArray(tagArray: { id: number, tag: string }[], checkTag: { id: number, tag: string }) {
+    for (const t of tagArray) {
+        if (t.id === checkTag.id && t.tag === checkTag.tag) {
+            return true;
+        }
+    }
+    return false;
+}
+
 export default function Blogs() {
 
     const [blogs, setBlogs] = useState([]);
-    const [originalTags, setOriginalTags] = useState<{ id: number, tag: string }[]>([]);
-    const [tags, setTags] = useState<{ id: number, tag: string }[]>([]);
-    const [selectedTags, setSelectedTags] = useState<{ id: number, tag: string }[]>([]);
+
+    // title and content
     const [titleSearch, setTitleSearch] = useState("");
     const [contentSearch, setContentSearch] = useState("");
+
+    // tags
+    const [originalTags, setOriginalTags] = useState<{ id: number, tag: string }[]>([]); // original tags
+    const [tags, setTags] = useState<{ id: number, tag: string }[]>([]); // tags that are showing
+    const [selectedTags, setSelectedTags] = useState<{ id: number, tag: string }[]>([]); // tags that are selected 
     const [tagFilter, setTagFilter] = useState("");
+
+    // search
     const [goSearch, setGoSearch] = useState<boolean>(false);
 
     const router = useRouter();
@@ -29,7 +81,11 @@ export default function Blogs() {
                 searchRequest.append("tags", t.tag)
             ));
         }
-        const response = await fetch(`/api/user/blogs/?${searchRequest.toString()}`);
+        const loggedIn = localStorage.getItem("accessToken");
+        const response = await fetch(`/api/user/blogs/?${searchRequest.toString()}`,
+            {
+                method: "GET", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` }
+            });
         const data = await response.json();
         setBlogs(data);
     };
@@ -46,11 +102,12 @@ export default function Blogs() {
     const filterTags = () => {
         const searchResponse = originalTags.filter((t) =>
         ((t.tag).toLowerCase().includes(tagFilter.toLowerCase())
-            && !(selectedTags.includes(t)))
+            && !(checkTagInArray(selectedTags, t)))
         );
         setTags(selectedTags.concat(searchResponse));
     };
 
+    // updating the tags that are checked or unchecked
     const updateSelectedTags = (e: React.ChangeEvent<HTMLInputElement>) => {
         const tagID = Number((e.target.id).replace("tag", ""));
 
@@ -63,22 +120,10 @@ export default function Blogs() {
         }
     }
 
-    function addTags(tagArray: { id: number, tag: string }[], newTag: { id: number, tag: string }) {
-        tagArray.push(newTag);
-        return tagArray;
-    }
-
-    function removeTags(tagArray: { id: number, tag: string }[], removeTagID: number) {
-        return tagArray.filter((t) => t.id != removeTagID);
-    }
-
+    // search function
     const userSearch = (ev: React.FormEvent) => {
         ev.preventDefault();
         setGoSearch(!goSearch);
-    }
-
-    function getID(id: number) {
-        return `tag${id}`;
     }
 
     useEffect(() => {
@@ -140,19 +185,6 @@ export default function Blogs() {
                         <button className="bg-pink-300" type="submit" >Search</button>
                     </form>
                 </div>
-
-                {/* <div className="flex flex-row">
-                    <p className="mr-2">Search by title:</p>
-                    <input type="text" id="blogTitleSearch" className="blogSearch" value={titleSearchField} onChange={titleSearchFieldChange} />
-                </div>
-                <div className="flex flex-row">
-                    <p className="mr-2">Search by content:</p>
-                </div>
-                <div className="flex flex-row gap-2">
-                    <button className="bg-pink-300" onClick={userSearch}>Search</button>
-                    <button className="bg-slate-200" onClick={clearSearch}>Clear</button>
-                </div> */}
-
 
                 <h1 className="text-pink-700 font-bold mb-2">{blogs.length} blogs found </h1>
                 <div className="blogList grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 col-span-2 gap-4">

@@ -1,49 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from 'next/router'
 import Navigation from '@/components/Navigation';
+import { Blog, addTags, removeTags, getID, checkTagInArray } from '@/pages/blogs/index';
 
 export default function EditBlog() {
 
-    interface Blog {
-        id: number;
-        title: string;
-        content: string;
-        flags: number;
-        up: number;
-        down: number;
-        hide: boolean;
-        userID: number;
-        user: { id: number; username: string; avatar: number };
-        tags: { id: number; tag: string }[];
-        templates: [];
-        BlogReport: [];
-    }
+    // title and content
+    const [titleEdit, setTitleEdit] = useState("");
+    const [contentEdit, setContentEdit] = useState("");
 
-    const defaultBlog: Blog = {
-        id: 0,
-        title: "", content: "",
-        flags: 0, up: 0, down: 0, hide: false, userID: 0,
-        user: { id: 0, username: "", avatar: 0 },
-        tags: [],
-        templates: [],
-        BlogReport: []
-    }
-
+    // tags
     const [originalTags, setOriginalTags] = useState<{ id: number, tag: string }[]>([]); // original tags
     const [tags, setTags] = useState<{ id: number, tag: string }[]>([]); // tags that are showing
     const [selectedTags, setSelectedTags] = useState<{ id: number, tag: string }[]>([]); // tags that are selected
     const [tagFilter, setTagFilter] = useState("");
 
-    const [titleEdit, setTitleEdit] = useState("");
-    const [contentEdit, setContentEdit] = useState("");
-
+    // adding new tag
     const [newTagField, setNewTagField] = useState("");
     const [newTagID, setNewTagID] = useState(-1);
 
     const router = useRouter();
     const { blogID } = router.query;
     const numID = Number(blogID);
-    const [blog, setBlog] = useState<Blog>(defaultBlog);
 
     // check if the user is logged in 
     function checkLoggedIn() {
@@ -54,13 +32,13 @@ export default function EditBlog() {
 
     }
 
+    // fetch blog from api
     const fetchBlog = async () => {
         const data = await fetch(`/api/user/blogs/${numID}`, {
             method: "GET"
         })
             .then((response) => response.json())
             .then((b: Blog) => {
-                setBlog(b);
                 setTitleEdit(b.title);
                 setContentEdit(b.content);
                 setSelectedTags(b.tags);
@@ -87,7 +65,7 @@ export default function EditBlog() {
             );
 
             if (response.ok) {
-                alert("successfully updated");
+                alert("Successfully updated");
                 const data = await response.json();
                 router.push(`/blogs/${data.id}`);
             }
@@ -119,6 +97,7 @@ export default function EditBlog() {
         setTags(selectedTags.concat(searchResponse));
     };
 
+    // updating the tags that are checked or unchecked
     const updateSelectedTags = (e: React.ChangeEvent<HTMLInputElement>) => {
         const tagID = Number((e.target.id).replace("tag", ""));
         const tagToModify = tags.filter((t) => t.id == tagID)[0];
@@ -131,18 +110,6 @@ export default function EditBlog() {
         else {
             setSelectedTags(removeTags(selectedTags, tagID));
         }
-    }
-
-    function addTags(tagArray: { id: number, tag: string }[], newTag: { id: number, tag: string }) {
-        return tagArray.concat([newTag]);
-    }
-
-    function removeTags(tagArray: { id: number, tag: string }[], removeTagID: number) {
-        return tagArray.filter((t) => t.id != removeTagID);
-    }
-
-    function getID(id: number) {
-        return `tag${id}`;
     }
 
     // add a new tag to the list of visible tags
@@ -159,15 +126,6 @@ export default function EditBlog() {
             setTags(addTags(tags, tagToAdd));
             setSelectedTags(addTags(selectedTags, tagToAdd));
         }
-    }
-
-    function checkTagInArray(tagArray: { id: number, tag: string }[], checkTag: { id: number, tag: string }) {
-        for (const t of tagArray) {
-            if (t.id === checkTag.id && t.tag === checkTag.tag) {
-                return true;
-            }
-        }
-        return false;
     }
 
     useEffect(() => {
@@ -238,16 +196,7 @@ export default function EditBlog() {
                                         onChange={(e) => (setNewTagField(e.target.value))}>
                                     </input>
                                 </div>
-
                             </div>
-                            {/* <div>
-                                {selectedTags.map((t) => (
-                                    <div>
-                                        <div>{t.id}</div>
-                                        <div>{t.tag}</div>
-                                    </div>
-                                ))}
-                            </div> */}
                         </div>
 
                         <button className="bg-pink-300 mt-2" type="submit" >Edit Blog</button>

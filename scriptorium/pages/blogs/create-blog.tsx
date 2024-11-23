@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from 'next/router'
 import Navigation from '@/components/Navigation';
+import { addTags, removeTags, getID, checkTagInArray } from '@/pages/blogs/index';
 
 export default function Blogs() {
 
+    // title and content
+    const [titleCreate, setTitleCreate] = useState("");
+    const [contentCreate, setContentCreate] = useState("");
+
+    // tags
     const [originalTags, setOriginalTags] = useState<{ id: number, tag: string }[]>([]); // original tags
     const [tags, setTags] = useState<{ id: number, tag: string }[]>([]); // tags that are showing
     const [selectedTags, setSelectedTags] = useState<{ id: number, tag: string }[]>([]); // tags that are selected
     const [tagFilter, setTagFilter] = useState("");
 
-    const [titleCreate, setTitleCreate] = useState("");
-    const [contentCreate, setContentCreate] = useState("");
-
+    // adding new tag
     const [newTagField, setNewTagField] = useState("");
     const [newTagID, setNewTagID] = useState(-1);
 
@@ -71,11 +75,12 @@ export default function Blogs() {
     const filterTags = () => {
         const searchResponse = originalTags.filter((t) =>
         ((t.tag).toLowerCase().includes(tagFilter.toLowerCase())
-            && !(selectedTags.includes(t)))
+            && !(checkTagInArray(selectedTags, t)))
         );
         setTags(selectedTags.concat(searchResponse));
     };
 
+    // updating the tags that are checked or unchecked
     const updateSelectedTags = (e: React.ChangeEvent<HTMLInputElement>) => {
         const tagID = Number((e.target.id).replace("tag", ""));
 
@@ -86,19 +91,6 @@ export default function Blogs() {
         else {
             setSelectedTags(removeTags(selectedTags, tagID));
         }
-    }
-
-    function addTags(tagArray: { id: number, tag: string }[], newTag: { id: number, tag: string }) {
-        tagArray.push(newTag);
-        return tagArray;
-    }
-
-    function removeTags(tagArray: { id: number, tag: string }[], removeTagID: number) {
-        return tagArray.filter((t) => t.id != removeTagID);
-    }
-
-    function getID(id: number) {
-        return `tag${id}`;
     }
 
     // add a new tag to the list of visible tags
