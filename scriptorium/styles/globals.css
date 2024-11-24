@@ -25,3 +25,41 @@ body {
     text-wrap: balance;
   }
 }
+
+/* blogs (temporary) */
+
+.blogSearchTitle {
+  @apply text-xl font-bold mb-2;
+}
+
+.blogItem {
+  @apply border-2 p-2 rounded-md;
+}
+
+.blogItem:hover {
+  @apply shadow-md shadow-gray-400;
+}
+
+#newTagItem {
+  @apply border-gray-500
+}
+
+#newTagItem:hover {
+  @apply bg-white text-black;
+}
+
+.tagItem {
+  @apply border-2 p-1 rounded-md bg-white has-[:checked]:bg-gray-400 has-[:checked]:text-white;
+}
+
+.tagItem:hover {
+  @apply bg-gray-400 text-white;
+}
+
+.blogItemTitle {
+  @apply font-bold;
+}
+
+.blogSearch {
+  @apply border-2;
+}
