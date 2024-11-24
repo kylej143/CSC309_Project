@@ -147,6 +147,15 @@ export default async function handler(req, res) {
                     include: {
                         difference: false,
                         absDifference: false,
+                        user: {
+                            include: {
+                                password: false,
+                                name: false,
+                                email: false,
+                                phoneNumber: false,
+                                role: false,
+                            }
+                        },
                         CommentReport: {
                             include: {
                                 userID: false,
@@ -171,6 +180,15 @@ export default async function handler(req, res) {
                     include: {
                         difference: false,
                         absDifference: false,
+                        user: {
+                            include: {
+                                password: false,
+                                name: false,
+                                email: false,
+                                phoneNumber: false,
+                                role: false,
+                            }
+                        },
                         CommentReport: {
                             include: {
                                 userID: false,
@@ -192,6 +210,15 @@ export default async function handler(req, res) {
                     include: {
                         difference: false,
                         absDifference: false,
+                        user: {
+                            include: {
+                                password: false,
+                                name: false,
+                                email: false,
+                                phoneNumber: false,
+                                role: false,
+                            }
+                        },
                         CommentReport: {
                             include: {
                                 userID: false,

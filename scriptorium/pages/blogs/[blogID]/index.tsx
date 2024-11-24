@@ -3,11 +3,34 @@ import { useRouter } from 'next/router'
 import Navigation from '@/components/Navigation';
 import { Blog, defaultBlog } from '@/pages/blogs/index';
 
+
+interface Comment {
+    id: number;
+    content: string;
+    flags: number;
+    up: number;
+    down: number;
+    hide: boolean;
+    userID: number;
+    blogID: number;
+    parentCommentID: number;
+    user: { id: number; username: string; avatar: number };
+    CommentReport: [];
+}
+
+interface NestedComment extends Comment {
+    children: NestedComment[];
+}
+
 export default function BlogPost() {
 
     const [blog, setBlog] = useState<Blog>(defaultBlog);
     const [username, setUsername] = useState<String>("");
     const [authorMatch, setAuthorMatch] = useState(false);
+
+    const [comments, setComments] = useState<Comment[]>([]);
+    const [nestedComments, setNestedComments] = useState<NestedComment[]>([]);
+    const [newComments, setNewComments] = useState<Map<number, string>>(new Map<number, string>());
 
     const router = useRouter();
     const { blogID } = router.query;
@@ -30,8 +53,9 @@ export default function BlogPost() {
                 method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` }
             })
                 .then((response) => response.json())
-                .then((visitor: { username: String, name: String, email: String, avatar: Number, phoneNumber: Number }) =>
-                    setUsername(visitor.username));
+                .then((visitor: { username: String, name: String, email: String, avatar: Number, phoneNumber: Number }) => {
+                    setUsername(visitor.username);
+                });
         }
     }
 
@@ -94,17 +118,144 @@ export default function BlogPost() {
         }
     }
 
+    // get comments from api
+    const fetchComments = async () => {
+        await fetch(`/api/user/blogs/${numID}/comments`, {
+            method: "GET"
+        })
+            .then((response) => response.json())
+            .then((c: Comment[]) => setComments(c));
+    };
+
+    // change comment data into a more useful structure
+    // logic from https://stackoverflow.com/questions/36829778/rendering-nested-threaded-comments-in-react
+    function restructureComments() {
+        let nestedComments: NestedComment[] = [];
+
+        comments.forEach((c) => nestedComments = nestedComments.concat([
+            { ...c, children: [] }
+        ]));
+
+        comments.forEach((c) => {
+            if (c.parentCommentID !== null) {
+                // get the parent comment, and add the current comment as its child woo
+                let parentComment = nestedComments.filter((nc) => nc.id === c.parentCommentID)[0];
+                parentComment.children = (parentComment.children).concat([{ ...c, children: [] }]);
+            }
+        })
+        setNestedComments(nestedComments);
+    }
+
+    const addComment = async (id: number) => {
+
+        const commentToAdd = newComments.get(id);
+
+        const loggedIn = localStorage.getItem("accessToken");
+
+        // theoretically should not have to encounter login error, since checkLogggedIn is executed earlier
+        if (loggedIn) {
+
+            let commentObject: any = { content: commentToAdd };
+            if (id !== -1) {
+                commentObject = { content: commentToAdd, parentCommentID: id }
+            }
+
+            const response = await fetch(`/api/user/blogs/${numID}/comments`,
+                {
+                    method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` },
+                    body: JSON.stringify(commentObject),
+                }
+            );
+
+            if (response.ok) {
+                alert("successfully saved");
+                router.push(`/blogs/${numID}`);
+                location.reload();
+            }
+            else {
+                const data = await response.json();
+                alert(data.error);
+            }
+        }
+        else {
+            alert("please log in");
+        }
+    }
+
+    function NestedComment(props: { head: number, parent: any, id: number, author: string, avatar: number, content: string }) {
+        let parentCheck = false;
+
+        if (props.head === -1) {
+            parentCheck = (props.parent === null);
+        }
+        else {
+            parentCheck = (props.parent === props.head);
+        }
+
+        if (parentCheck) {
+            return (
+                <div>
+                    <div className="border-2 p-2 rounded-md ">
+                        <div className="flex flex-row">
+                            <div className="flex flex-row gap-2 items-center border-2 p-1 rounded-md bg-gray-200">
+                                <div className="bg-gray-400 p-1 rounded-md">{props.avatar}</div>
+                                <div>{props.author}</div>
+                            </div>
+                            <div className="flex ml-4 items-center">{props.content}</div>
+                        </div>
+                        <div>Reply</div>
+                        <input type="text" className="blogSearch w-full" onKeyDown={(e) => { if (e.key === 'Enter') { addComment(props.id) } }}
+                            onChange={(e) => (setNewComments(newComments.set(props.id, e.target.value)))}>{newComments.get(props.id)}</input>
+                    </div>
+                    <div className="flex flex-row">
+                        <div className="w-10 flex-none"></div>
+                        <div className="flex-1">
+                            {nestedComments.map((c) => (
+                                <div key={c.id}>
+                                    <NestedComment
+                                        head={props.id}
+                                        parent={c.parentCommentID}
+                                        id={c.id}
+                                        author={c.user.username}
+                                        avatar={c.user.avatar}
+                                        content={c.content}>
+                                    </NestedComment>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        else {
+            // <div className="w-10 flex-none"></div>
+            return <div></div>
+        }
+    }
+
+    function initializeNewComments() {
+        let newCommentMap = new Map<number, string>();
+        comments.forEach((c) => (newCommentMap.set(c.id, "")));
+    }
+
+
     useEffect(() => {
         if (!blogID) {
             return;
         }
         fetchBlog();
         fetchVisitor();
+        fetchComments();
     }, [blogID]);
 
     useEffect(() => {
         checkAuthorMatch();
     }, [username, blog]);
+
+    useEffect(() => {
+        restructureComments();
+        initializeNewComments();
+    }, [comments])
 
     return (
         <div className="h-screen flex flex-col">
@@ -129,7 +280,34 @@ export default function BlogPost() {
                     ))}
                 </div>
             </div>
-            <div className="p-4 bg-green-100 flex-1">{blog.content}</div>
+            <div className="p-4 bg-green-100">{blog.content}</div>
+            <div className="p-4">
+                <div className="blogSearchTitle text-green-700">Comments</div>
+                <div className="border-2 p-2 rounded-md ">
+
+                    <div>Write a comment</div>
+                    <input type="text" className="blogSearch w-full" onKeyDown={(e) => { if (e.key === 'Enter') { addComment(-1) } }}
+                        onChange={(e) => (setNewComments(newComments.set(-1, e.target.value)))}></input>
+                </div>
+                <div>
+                    {nestedComments.map((c) => (
+                        <div key={c.id} className="hi">
+                            <NestedComment
+                                head={-1}
+                                parent={c.parentCommentID}
+                                id={c.id}
+                                author={c.user.username}
+                                avatar={c.user.avatar}
+                                content={c.content}>
+                            </NestedComment>
+                        </div>
+                    ))}
+                </div>
+                <div>
+
+                </div>
+
+            </div>
         </div>
     );
 }
