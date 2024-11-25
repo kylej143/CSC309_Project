@@ -11,15 +11,11 @@ export default function Register() {
     const [avatar, setAvatar] = useState(0);
     const [phoneNumber, setPhoneNumber] = useState(0);
 
-    const [auth, setAuth] = useState("");
-    useEffect(() => {
-        setAuth("Bearer " + String(localStorage.getItem("accessToken")));
-    }, []);
 
     function GetUser() {
         fetch("/api/user/protected_test", {
             method: "POST",
-            headers: {Authorization: auth},
+            headers: {Authorization: ('Bearer ' + String(localStorage.getItem("accessToken")))},
         }).then(r => r.json()).then(
             (res : {username: String, name: String, email: String, avatar: Number, phoneNumber: Number}) => {
                 setUsername(String(res.username))
@@ -29,7 +25,10 @@ export default function Register() {
                 setPhoneNumber(Number(res.phoneNumber))
             })
     }
-    GetUser()
+
+    useEffect(() => {
+        GetUser()
+    }, []);
 
 
     return (
@@ -76,6 +75,4 @@ export default function Register() {
 
         </>
     );
-
-
 }

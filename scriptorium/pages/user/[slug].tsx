@@ -1,6 +1,5 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import Navigation from '../../components/Navigation';
-import Link from "next/link";
 import { useRouter } from 'next/router'
 
 
@@ -14,20 +13,25 @@ export default function Register() {
     const [email, setEmail] = useState("");
     const [avatar, setAvatar] = useState(0);
     const [phoneNumber, setPhoneNumber] = useState(0);
+    const [requested, setRequested] = useState(false);
 
     function GetUser() {
-        fetch("/api/user/get_info?username=" + slug, {
-            method: "GET",
-        }).then(r => r.json()).then(
-            (res : {username: String, name: String, email: String, avatar: Number, phoneNumber: Number}) => {
-                setUsername(String(res.username))
-                setName(String(res.name))
-                setEmail(String(res.email))
-                setAvatar(Number(res.avatar))
-                setPhoneNumber(Number(res.phoneNumber))
-            })
+        if (slug != undefined) {
+            setRequested(true);
+            fetch("/api/user/get_info?username=" + slug, {
+                method: "GET",
+            }).then(r => r.json()).then(
+                (res : {username: String, name: String, email: String, avatar: Number, phoneNumber: Number}) => {
+                    setUsername(String(res.username))
+                    setName(String(res.name))
+                    setEmail(String(res.email))
+                    setAvatar(Number(res.avatar))
+                    setPhoneNumber(Number(res.phoneNumber))
+                })
+        }
     }
-    GetUser()
+
+    if (!requested) GetUser();
 
 
     return (
