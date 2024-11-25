@@ -27,10 +27,17 @@ export default function BlogPost() {
     const [blog, setBlog] = useState<Blog>(defaultBlog);
     const [username, setUsername] = useState<String>("");
     const [authorMatch, setAuthorMatch] = useState(false);
+    const [ratingNum, setRatingNum] = useState<Number>(0);
+
+    const [tempUpvote, setTempUpvote] = useState(false);
+    const [tempDownvote, setTempDownvote] = useState(false);
+    const [upvote, setUpvote] = useState(false);
+    const [downvote, setDownvote] = useState(false);
 
     const [comments, setComments] = useState<Comment[]>([]);
     const [nestedComments, setNestedComments] = useState<NestedComment[]>([]);
     const [newComments, setNewComments] = useState<Map<number, string>>(new Map<number, string>());
+    const [reloadComments, setReloadComments] = useState(false);
 
     const router = useRouter();
     const { blogID } = router.query;
@@ -42,7 +49,21 @@ export default function BlogPost() {
             method: "GET"
         })
             .then((response) => response.json())
-            .then((b: Blog) => setBlog(b));
+            .then((b: Blog) => {
+                setBlog(b);
+                setRatingNum(b.up - b.down);
+            });
+    };
+
+    // fetch blog, set rating only
+    const fetchBlogOnlyRating = async () => {
+        await fetch(`/api/user/blogs/${numID}`, {
+            method: "GET"
+        })
+            .then((response) => response.json())
+            .then((b: Blog) => {
+                setRatingNum(b.up - b.down);
+            });
     };
 
     // fetch info of the visitor/user on the page
@@ -118,6 +139,103 @@ export default function BlogPost() {
         }
     }
 
+    // get blog rating info from api
+    const fetchBlogRating = async () => {
+        const loggedIn = localStorage.getItem("accessToken");
+        if (loggedIn) {
+            try {
+                const result = await fetch(`/api/user/blogs/${numID}/ratings`, {
+                    method: "GET", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` }
+                });
+                if (result.ok) {
+                    await result.json()
+                        .then((response: { id: number, userID: number, blogID: number, upvote: boolean, downvote: boolean }) => {
+                            setUpvote(response.upvote);
+                            setDownvote(response.downvote);
+                            setTempUpvote(response.upvote);
+                            setTempDownvote(response.downvote);
+                        });
+                }
+            }
+            catch (error: any) {
+                alert(error.toString());
+            }
+        }
+    }
+
+    // upvote ui
+    const changeUpvoteUI = () => {
+        const dropdown = document.querySelectorAll(".upvote");
+        if (upvote) {
+            dropdown[0].classList.add("rateSelected");
+        }
+        else {
+            dropdown[0].classList.remove("rateSelected");
+        }
+    }
+
+    // downvote ui
+    const changeDownvoteUI = () => {
+        const dropdown = document.querySelectorAll(".downvote");
+        if (downvote) {
+            dropdown[0].classList.add("rateSelected");
+        }
+        else {
+            dropdown[0].classList.remove("rateSelected");
+        }
+    }
+
+    // make an upvote or downvote
+    const tryRating = async (up: boolean, down: boolean, type: string) => {
+
+        const loggedIn = localStorage.getItem("accessToken");
+
+        // preventing weird cases
+        if (type === "upvote") {
+            if (up === upvote) {
+                setTempUpvote(upvote);
+                return;
+            }
+            if (up === downvote && up === true) {
+                setTempUpvote(upvote);
+                return;
+            }
+        }
+        else if (type === "downvote") {
+            if (down === downvote) {
+                setTempDownvote(downvote);
+                return;
+            }
+            if (down === upvote && down === true) {
+                setTempDownvote(downvote);
+                return;
+            }
+        }
+
+        const response = await fetch(`/api/user/blogs/${numID}`,
+            {
+                method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` },
+                body: JSON.stringify({
+                    "upvote": up,
+                    "downvote": down
+                }),
+            }
+        );
+
+        if (response.ok) {
+            if (type === "upvote") { setUpvote(up); }
+            else if (type === "downvote") { setDownvote(down); }
+
+        }
+        else {
+            const data = await response.json();
+            alert(data.error);
+            if (type === "upvote") { setTempUpvote(upvote); }
+            else if (type === "downvote") { setTempDownvote(downvote); }
+        }
+
+    }
+
     // get comments from api
     const fetchComments = async () => {
         await fetch(`/api/user/blogs/${numID}/comments`, {
@@ -169,8 +287,9 @@ export default function BlogPost() {
 
             if (response.ok) {
                 alert("successfully saved");
-                router.push(`/blogs/${numID}`);
-                location.reload();
+                setReloadComments(!reloadComments);
+                // router.push(`/blogs/${numID}`);
+                // location.reload();
             }
             else {
                 const data = await response.json();
@@ -243,19 +362,68 @@ export default function BlogPost() {
         if (!blogID) {
             return;
         }
-        fetchBlog();
+        fetchBlog()
         fetchVisitor();
         fetchComments();
+        fetchBlogRating();
     }, [blogID]);
 
     useEffect(() => {
+        if (!blogID) {
+            return;
+        }
         checkAuthorMatch();
     }, [username, blog]);
 
     useEffect(() => {
+        if (!blogID) {
+            return;
+        }
         restructureComments();
         initializeNewComments();
-    }, [comments])
+    }, [comments]);
+
+    useEffect(() => {
+        if (!blogID) {
+            return;
+        }
+        fetchComments();
+    }, [reloadComments]);
+
+    // rating effects 
+    useEffect(() => {
+        if (tempUpvote === true) {
+            tryRating(true, false, "upvote");
+        }
+        else if (tempUpvote === false) {
+            tryRating(false, false, "upvote");
+        }
+    }, [tempUpvote]);
+
+    useEffect(() => {
+        if (tempDownvote === true) {
+            tryRating(false, true, "downvote");
+        }
+        else if (tempDownvote === false) {
+            tryRating(false, false, "downvote");
+        }
+    }, [tempDownvote]);
+
+    useEffect(() => {
+        if (!blogID) {
+            return;
+        }
+        fetchBlogOnlyRating();
+        changeUpvoteUI();
+    }, [upvote]);
+
+    useEffect(() => {
+        if (!blogID) {
+            return;
+        }
+        fetchBlogOnlyRating();
+        changeDownvoteUI();
+    }, [downvote]);
 
     return (
         <div className="h-screen flex flex-col">
@@ -279,6 +447,22 @@ export default function BlogPost() {
                         </div>
                     ))}
                 </div>
+            </div>
+            <div className="ratings p-4 border-2 flex flex-row items-center">
+                <button className="rateButton upvote"
+                    onClick={(e) => setTempUpvote(!upvote)}>
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" className="fill-black">
+                        <path d="M440-160v-487L216-423l-56-57 320-320 320 320-56 57-224-224v487h-80Z" />
+                    </svg>
+                </button>
+                <div className="ml-2 mr-2">{Number(ratingNum)}</div>
+                <button className="rateButton downvote"
+                    onClick={(e) => setTempDownvote(!downvote)}>
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" className="fill-black">
+                        <path d="M440-800v487L216-537l-56 57 320 320 320-320-56-57-224 224v-487h-80Z" />
+                    </svg>
+                </button>
+
             </div>
             <div className="p-4 bg-green-100">{blog.content}</div>
             <div className="p-4">
@@ -308,6 +492,6 @@ export default function BlogPost() {
                 </div>
 
             </div>
-        </div>
+        </div >
     );
 }
