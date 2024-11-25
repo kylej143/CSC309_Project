@@ -288,8 +288,6 @@ export default function BlogPost() {
             if (response.ok) {
                 alert("successfully saved");
                 setReloadComments(!reloadComments);
-                // router.push(`/blogs/${numID}`);
-                // location.reload();
             }
             else {
                 const data = await response.json();
