@@ -24,6 +24,10 @@ export default function App({ Component, pageProps }: AppProps) {
                 }),
             }).then(r => r.json()).then(
                 (res : {accessToken: String}) => {
+                    if (res.accessToken == null) {
+                        localStorage.setItem("accessToken", "")
+                        localStorage.setItem("refreshToken", "")
+                    }
                     setAccessToken(String(res.accessToken));
                     return
                 })
