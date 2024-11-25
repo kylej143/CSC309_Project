@@ -11,7 +11,7 @@ export default function App({ Component, pageProps }: AppProps) {
     useEffect(() => {
         if (accessToken != "") localStorage.setItem("accessToken", accessToken);
         // get a new token every 500 seconds
-        const myTimeout = setTimeout(getNewAToken, 500000);
+        const myTimeout = setTimeout(getNewAToken, 10000);
     }, [accessToken, counter]);
 
     function getNewAToken() {
@@ -24,6 +24,10 @@ export default function App({ Component, pageProps }: AppProps) {
                 }),
             }).then(r => r.json()).then(
                 (res : {accessToken: String}) => {
+                    if (res.accessToken == null) {
+                        localStorage.setItem("accessToken", "")
+                        localStorage.setItem("refreshToken", "")
+                    }
                     setAccessToken(String(res.accessToken));
                     return
                 })
