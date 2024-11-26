@@ -1,0 +1,9 @@
+FROM swift:latest
+
+WORKDIR /app
+
+COPY . /app
+
+RUN swiftc main.swift
+
+CMD ["./main"
