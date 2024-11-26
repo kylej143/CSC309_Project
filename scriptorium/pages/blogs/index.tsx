@@ -68,6 +68,9 @@ export default function Blogs() {
     const [newCodeTemplateID, setNewCodeTemplateID] = useState(-1);
     const [newTemplateError, setNewTemplateError] = useState("");
 
+    // sort
+    const [sortMethod, setSortMethod] = useState("valued");
+
     // search
     const [goSearch, setGoSearch] = useState<boolean>(false);
 
@@ -92,6 +95,7 @@ export default function Blogs() {
                 searchRequest.append("templates", c.id.toString())
             ));
         }
+        searchRequest.append("sort", sortMethod);
         const loggedIn = localStorage.getItem("accessToken");
         const response = await fetch(`/api/user/blogs/?${searchRequest.toString()}`,
             {
@@ -241,17 +245,50 @@ export default function Blogs() {
                             <div className="text-red-600">{newTemplateError}</div>
                         </div>
 
-                        <button className="bg-pink-300" type="submit" >Search</button>
+                        <div className="flex flex-row">
+                            <div>Sort by:</div>
+                            <div className="ml-2">
+                                <select id="sort-filter" onChange={(e) => setSortMethod(e.target.value)}>
+                                    <option>valued</option>
+                                    <option>recent</option>
+                                    <option>controversial</option>
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <button className="bg-pink-300 p-1 mt-4" type="submit" >Search</button>
 
                     </form>
                 </div>
 
                 <h1 className="text-pink-700 font-bold mb-2">{blogs.length} blogs found </h1>
-                <div className="blogList grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 col-span-2 gap-4">
+                <div className="blogList grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 col-span-2 gap-4">
                     {blogs.map((blog) => (
                         <div key={blog.id} className="blogItem" onClick={(e) => router.push(`/blogs/${blog.id}`)}>
-                            <p className="blogItemTitle">{blog.title}</p>
-                            <p className="blogItemContent">{blog.content}</p>
+
+                            <div className="flex flex-row w-full bg-green-100">
+                                <div>
+                                    <p className="blogItemTitle">{blog.title}</p>
+                                    <p className="blogItemContent">{blog.content.length > 75 ? `${blog.content.substring(0, 70)} [...]` : `${blog.content}`}</p>
+                                </div>
+                                <div className="flex-1"></div>
+                                <div className="items-center flex flex-row">
+                                    <div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" className="fill-black">
+                                            <path d="M440-160v-487L216-423l-56-57 320-320 320 320-56 57-224-224v487h-80Z" />
+                                        </svg>
+
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" className="fill-black">
+                                            <path d="M440-800v487L216-537l-56 57 320 320 320-320-56-57-224 224v-487h-80Z" />
+                                        </svg>
+                                    </div>
+                                    <div className="text-lg p-2">{blog.up - blog.down}</div>
+                                </div>
+
+                            </div>
+
+
                             <div className="blogTags flex flex-row gap-2">
                                 <p className="font-bold">Tags:</p>
                                 {blog.tags.map((t) => (
