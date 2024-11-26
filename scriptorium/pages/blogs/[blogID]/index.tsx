@@ -305,9 +305,10 @@ export default function BlogPost() {
     const fetchComments = async () => {
         const searchRequest = new URLSearchParams();
         searchRequest.append("sort", sortMethod);
+        const loggedIn = localStorage.getItem("accessToken");
         try {
             await fetch(`/api/user/blogs/${numID}/comments?${searchRequest.toString()}`, {
-                method: "GET"
+                method: "GET", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` }
             })
                 .then((response) => response.json())
                 .then((c: Comment[]) => {
@@ -520,7 +521,7 @@ export default function BlogPost() {
         comments.forEach((c) => (newCommentMap.set(c.id, "")));
     }
 
-    function NestedComment(props: { head: number, parent: any, id: number, author: string, avatar: number, content: string }) {
+    function NestedComment(props: { head: number, parent: any, id: number, author: string, avatar: number, content: string, hide: boolean }) {
         const [rr, sr2] = useState("");
         const [rm, sr] = useState(false);
 
@@ -546,6 +547,35 @@ export default function BlogPost() {
                 alert("error");
             }
         };
+
+        const hideComment = async () => {
+            const loggedIn = localStorage.getItem("accessToken");
+
+            const response = await fetch(`/api/admin/comments/${props.id}`,
+                {
+                    method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` },
+                    body: JSON.stringify({
+                        "hide": !props.hide,
+                    })
+                }
+            );
+
+            if (response.ok) {
+                if (props.hide === false) {
+                    alert("comment hidden");
+                }
+                else {
+                    alert("comment unhidden");
+                }
+                setHideReload(!hideReload);
+
+            }
+            else {
+                const data = await response.json();
+                alert(data.error);
+
+            }
+        }
 
         let parentCheck = false;
 
@@ -588,11 +618,23 @@ export default function BlogPost() {
                         <div>Reply</div>
                         <input type="text" className="blogSearch w-full" onKeyDown={(e) => { if (e.key === 'Enter') { addComment(props.id) } }}
                             onChange={(e) => (setNewComments(newComments.set(props.id, e.target.value)))}></input>
-                        <button
-                            className="bg-pink-600 text-white p-1 mt-2 rounded-md"
-                            onClick={op}>
-                            report
-                        </button>
+
+                        <div className="flex flex-row gap-2 items-center mt-2">
+                            <button
+                                className="bg-pink-600 text-white p-1 rounded-md"
+                                onClick={op}>
+                                report
+                            </button>
+                            <div>
+                                {isAdmin ?
+                                    <button className={`${props.hide === true ? "bg-orange-300" : "bg-orange-500"} text-white p-1 mt-2 rounded-md`}
+                                        onClick={() => hideComment()}>{`ADMIN: ${props.hide === true ? "un" : ""}hide comment`}</button>
+                                    :
+                                    <div></div>
+                                }
+                            </div>
+                            <div className="p-1 rounded-md text-orange-600">{props.hide === true ? "hidden" : ""}</div>
+                        </div>
                     </div>
                     <div className="flex flex-row">
                         <div className="w-10 flex-none"></div>
@@ -605,7 +647,8 @@ export default function BlogPost() {
                                         id={c.id}
                                         author={c.user.username}
                                         avatar={c.user.avatar}
-                                        content={c.content}>
+                                        content={c.content}
+                                        hide={c.hide}>
                                     </NestedComment>
                                 </div>
                             ))}
@@ -767,7 +810,7 @@ export default function BlogPost() {
                 <div className="flex-1"></div>
                 <div>
                     {isAdmin ?
-                        <button className="bg-orange-500 text-white p-1 mt-2 rounded-md"
+                        <button className={`${blog.hide === true ? "bg-orange-300" : "bg-orange-500"} text-white p-1 mt-2 rounded-md`}
                             onClick={() => hideBlogPost()}>{`ADMIN: ${blog.hide === true ? "un" : ""}hide post`}</button>
                         :
                         <div></div>
@@ -808,7 +851,8 @@ export default function BlogPost() {
                                 id={c.id}
                                 author={c.user.username}
                                 avatar={c.user.avatar}
-                                content={c.content}>
+                                content={c.content}
+                                hide={c.hide}>
                             </NestedComment>
                         </div>
                     ))}
