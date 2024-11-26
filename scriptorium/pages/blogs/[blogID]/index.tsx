@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from 'next/router'
 import Navigation from '@/components/Navigation';
 import { Blog, defaultBlog } from '@/pages/blogs/index';
-import { relative } from "path";
-
 
 interface Comment {
     id: number;
@@ -493,7 +491,7 @@ export default function BlogPost() {
                     <div className="border-2 p-2 rounded-md ">
                         <div className="flex flex-row">
                             <div className="flex flex-row gap-2 items-center border-2 p-1 rounded-md bg-gray-200">
-                                <div className="bg-gray-400 p-1 rounded-md">{props.avatar}</div>
+                                <img src={`/avatars/avatar${props.avatar}.png`} alt={`${props.avatar}`} />
                                 <div>{props.author}</div>
                             </div>
                             <div className="flex ml-4 items-center">{props.content}</div>
@@ -628,7 +626,8 @@ export default function BlogPost() {
                 </div>
                 <div className="flex flex-row">
                     <div className="flex flex-row gap-2 items-center border-2 p-1 rounded-md bg-gray-200">
-                        <div className="bg-gray-400 p-1 rounded-md">{blog.user.avatar}</div>
+                        {/* <div className="bg-gray-400 p-1 rounded-md">{blog.user.avatar}</div> */}
+                        <img src={`/avatars/avatar${blog.user.avatar}.png`} alt={`${blog.user.avatar}`} />
                         <div>{blog.user.username}</div>
                     </div>
                 </div>
@@ -675,8 +674,7 @@ export default function BlogPost() {
                         <select id="sort-filter" onChange={(e) => {
                             setSortMethod(e.target.value);
                             setReloadComments(!reloadComments);
-                        }
-                        }>
+                        }}>
                             <option>valued</option>
                             <option>recent</option>
                             <option>controversial</option>

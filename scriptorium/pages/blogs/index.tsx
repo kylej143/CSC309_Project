@@ -297,7 +297,7 @@ export default function Blogs() {
                             </div>
                             <div className="flex flex-row">
                                 <div className="flex flex-row gap-2 items-center border-2 p-1 rounded-md bg-gray-200">
-                                    <div className="bg-gray-400 p-1 rounded-md">{blog.user.avatar}</div>
+                                    <img src={`/avatars/avatar${blog.user.avatar}.png`} alt={`${blog.user.avatar}`} />
                                     <div>{blog.user.username}</div>
                                 </div>
                             </div>
