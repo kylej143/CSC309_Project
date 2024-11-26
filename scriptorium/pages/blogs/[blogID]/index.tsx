@@ -475,6 +475,31 @@ export default function BlogPost() {
     }
 
     function NestedComment(props: { head: number, parent: any, id: number, author: string, avatar: number, content: string }) {
+        const [rr, sr2] = useState("");
+        const [rm, sr] = useState(false);
+
+        const op = () => { sr(true); };
+        const cl = () => { sr(false); sr2(""); };
+
+        const report = async () => {
+            const li = localStorage.getItem("accessToken");
+
+            try {
+                const r = await fetch(`/api/user/comment_report`, {
+                    method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${li}` },
+                    body: JSON.stringify({ commentID: props.id, reason: rr })
+                });
+
+                if (r.ok) {
+                    alert("You successfully reported the comment.");
+                    cl();
+                } else {
+                    alert("error");
+                }
+            } catch {
+                alert("error");
+            }
+        };
 
         let parentCheck = false;
 
@@ -517,6 +542,11 @@ export default function BlogPost() {
                         <div>Reply</div>
                         <input type="text" className="blogSearch w-full" onKeyDown={(e) => { if (e.key === 'Enter') { addComment(props.id) } }}
                             onChange={(e) => (setNewComments(newComments.set(props.id, e.target.value)))}>{newComments.get(props.id)}</input>
+                        <button
+                            className="bg-pink-600 text-white"
+                            onClick={op}>
+                            report
+                        </button>
                     </div>
                     <div className="flex flex-row">
                         <div className="w-10 flex-none"></div>
@@ -535,6 +565,31 @@ export default function BlogPost() {
                             ))}
                         </div>
                     </div>
+                    {rm && (
+                        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center">
+                            <div className="bg-green p-6 w-full max-w-lg">
+                                <h2 className="text-xl font-bold mb-4">report the comment</h2>
+                                <textarea
+                                    className="border w-full mb-2 p-2"
+                                    placeholder="reason"
+                                    value={rr}
+                                    onChange={(e) => sr2(e.target.value)}>
+                                </textarea>
+                                <div className="flex justify-end">
+                                    <button
+                                        className="bg-pink text-white px-4 py-2 mr-l"
+                                        onClick={cl}>
+                                        cancel
+                                    </button>
+                                    <button
+                                        className="bg-pink text-white px-4 py-2 mr-l"
+                                        onClick={report}>
+                                        report
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         }

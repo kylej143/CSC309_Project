@@ -49,6 +49,12 @@ export function checkTagInArray(tagArray: { id: number, tag: string }[], checkTa
 }
 
 export default function Blogs() {
+    const [sb, ss] = useState<number | null>(null);
+    const [rm, sm] = useState(false);
+    const [rr, sr] = useState("");
+
+    const op = (blogId: number) => { ss(blogId); sm(true); };
+    const cl = () => { ss(null); sr(""); sm(false); };
 
     const [blogs, setBlogs] = useState<Blog[]>([]);
 
@@ -140,6 +146,25 @@ export default function Blogs() {
         ev.preventDefault();
         setGoSearch(!goSearch);
     }
+
+    const report = async () => {
+        const li = localStorage.getItem("accessToken");
+        try {
+            const r = await fetch(`/api/user/blog_report`, {
+                method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${li}` },
+                body: JSON.stringify({ blogID: sb, reason: rr })
+            });
+
+            if (r.ok) {
+                alert("You successfully reported the blog.");
+                cl();
+            } else {
+                alert("error");
+            }
+        } catch (error) {
+            alert("error");
+        }
+    };
 
     function addCodeTemplates(templateArray: { id: number, link: string }[], newTemplate: { id: number, link: string }) {
         return templateArray.concat([newTemplate]);
@@ -300,7 +325,37 @@ export default function Blogs() {
                                     <img src={`/avatars/avatar${blog.user.avatar}.png`} alt={`${blog.user.avatar}`} />
                                     <div>{blog.user.username}</div>
                                 </div>
+                                <button
+                                    className="bg-pink-600 text-white"
+                                    onClick={(e) => { e.stopPropagation(); op(blog.id); }}>
+                                    report
+                                </button>
                             </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+            {rm && (
+                <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center">
+                    <div className="bg-green p-6 w-full max-w-lg">
+                        <h2 className="text-xl font-bold mb-4">report the blog</h2>
+                        <textarea
+                            className="border w-full mb-2 p-2"
+                            placeholder="reason"
+                            value={rr}
+                            onChange={(e) => sr(e.target.value)}>
+                        </textarea>
+                        <div className="flex justify-end">
+                            <button
+                                className="bg-pink text-white px-4 py-2 mr-l"
+                                onClick={cl}>
+                                cancel
+                            </button>
+                            <button
+                                className="bg-pink text-white px-4 py-2 mr-l"
+                                onClick={report}>
+                                report
+                            </button>
                             <div>
                                 <p className="font-bold">Code Templates:</p>
                                 {blog.templates.map((t) => (
@@ -308,10 +363,9 @@ export default function Blogs() {
                                 ))}
                             </div>
                         </div>
-                    ))}
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
-
     )
 }
