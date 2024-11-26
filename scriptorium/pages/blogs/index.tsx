@@ -13,7 +13,7 @@ export interface Blog {
     userID: number;
     user: { id: number; username: string; avatar: number };
     tags: { id: number; tag: string }[];
-    templates: [];
+    templates: { id: number, title: string, explanation: string, code: string, private: boolean, forkID: number, userID: number }[];
     BlogReport: [];
 }
 
@@ -50,7 +50,7 @@ export function checkTagInArray(tagArray: { id: number, tag: string }[], checkTa
 
 export default function Blogs() {
 
-    const [blogs, setBlogs] = useState([]);
+    const [blogs, setBlogs] = useState<Blog[]>([]);
 
     // title and content
     const [titleSearch, setTitleSearch] = useState("");
@@ -61,6 +61,12 @@ export default function Blogs() {
     const [tags, setTags] = useState<{ id: number, tag: string }[]>([]); // tags that are showing
     const [selectedTags, setSelectedTags] = useState<{ id: number, tag: string }[]>([]); // tags that are selected 
     const [tagFilter, setTagFilter] = useState("");
+
+    // code templates
+    const [codeTemplates, setCodeTemplates] = useState<{ id: number, link: string }[]>([]);
+    const [codeTemplateField, setCodeTemplateField] = useState<string>("");
+    const [newCodeTemplateID, setNewCodeTemplateID] = useState(-1);
+    const [newTemplateError, setNewTemplateError] = useState("");
 
     // search
     const [goSearch, setGoSearch] = useState<boolean>(false);
@@ -79,6 +85,11 @@ export default function Blogs() {
         if (selectedTags.length !== 0) {
             selectedTags.map((t) => (
                 searchRequest.append("tags", t.tag)
+            ));
+        }
+        if (codeTemplates.length !== 0) {
+            codeTemplates.map((c) => (
+                searchRequest.append("templates", c.id.toString())
             ));
         }
         const loggedIn = localStorage.getItem("accessToken");
@@ -124,6 +135,35 @@ export default function Blogs() {
     const userSearch = (ev: React.FormEvent) => {
         ev.preventDefault();
         setGoSearch(!goSearch);
+    }
+
+    function addCodeTemplates(templateArray: { id: number, link: string }[], newTemplate: { id: number, link: string }) {
+        return templateArray.concat([newTemplate]);
+    }
+
+    // add a new codetemplate to the blog
+    const addNewCodeTemplate = (e: React.KeyboardEvent<HTMLInputElement>) => {
+
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const trimCodeTemplates = /.*code_templates\//
+            const templateNum = Number(codeTemplateField.replace(trimCodeTemplates, ""));
+            if (isNaN(templateNum)) {
+                setNewTemplateError("Invalid link format");
+                setCodeTemplateField("");
+            }
+            else {
+                setNewCodeTemplateID(newCodeTemplateID - 1);
+                const templateToAdd = {
+                    id: templateNum,
+                    link: codeTemplateField,
+                }
+                setCodeTemplates(addCodeTemplates(codeTemplates, templateToAdd));
+                setCodeTemplateField("");
+                setNewTemplateError("");
+            }
+
+        }
     }
 
     useEffect(() => {
@@ -182,16 +222,33 @@ export default function Blogs() {
                             </div>
                         </div>
 
+                        <div className="border-2 p-4 bg-gray-100 ">
+                            <div className=" gap-2 flex-wrap">
+                                {codeTemplates.map((c) => (
+                                    <div key={`template${c}`} className="flatItem flex flex-row gap-2">
+                                        <div>{c.link}</div>
+                                    </div>
+                                ))}
+                            </div>
+                            <input type="text"
+                                id="newCodeTemplateItem"
+                                className="blogSearch mb-2 w-full"
+                                value={codeTemplateField}
+                                placeholder="Search for a code template by link, and enter"
+                                onKeyDown={addNewCodeTemplate}
+                                onChange={(e) => (setCodeTemplateField(e.target.value))}>
+                            </input>
+                            <div className="text-red-600">{newTemplateError}</div>
+                        </div>
+
                         <button className="bg-pink-300" type="submit" >Search</button>
+
                     </form>
                 </div>
 
                 <h1 className="text-pink-700 font-bold mb-2">{blogs.length} blogs found </h1>
                 <div className="blogList grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 col-span-2 gap-4">
-                    {blogs.map((blog: {
-                        id: number; title: string; content: string; userID: number;
-                        user: { id: number; username: string; avatar: number }; tags: { id: number; tag: string }[]
-                    }) => (
+                    {blogs.map((blog) => (
                         <div key={blog.id} className="blogItem" onClick={(e) => router.push(`/blogs/${blog.id}`)}>
                             <p className="blogItemTitle">{blog.title}</p>
                             <p className="blogItemContent">{blog.content}</p>
@@ -206,6 +263,12 @@ export default function Blogs() {
                                     <div className="bg-gray-400 p-1 rounded-md">{blog.user.avatar}</div>
                                     <div>{blog.user.username}</div>
                                 </div>
+                            </div>
+                            <div>
+                                <p className="font-bold">Code Templates:</p>
+                                {blog.templates.map((t) => (
+                                    <p className="text-neutral-500">{`${t.id}: ${t.title}`}</p>
+                                ))}
                             </div>
                         </div>
                     ))}

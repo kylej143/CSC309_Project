@@ -589,6 +589,15 @@ export default function BlogPost() {
                         </div>
                     ))}
                 </div>
+
+                <div className="mt-2">Templates:</div>
+                <div className="flex flex-row gap-2 flex-wrap mt-2">
+                    {blog.templates.map((c) => (
+                        <div key={`template${c.id}`} className="flex flex-row gap-2 flatItem">
+                            <div onClick={(e) => router.push(`/code_templates/${c.id}`)}>{`${c.id}: ${c.title}`}</div>
+                        </div>
+                    ))}
+                </div>
             </div>
             <div className="ratings p-4 border-2 flex flex-row items-center">
                 <button className="rateButton upvote blogRatings"

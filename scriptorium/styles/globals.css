@@ -40,6 +40,14 @@ body {
   @apply shadow-md shadow-gray-400;
 }
 
+.flatItem {
+  @apply border-2 p-1 rounded-md bg-white;
+}
+
+.flatItem:hover {
+  @apply shadow-md shadow-gray-400;
+}
+
 #newTagItem {
   @apply border-gray-500
 }
