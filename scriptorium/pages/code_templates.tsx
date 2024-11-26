@@ -9,7 +9,11 @@ interface codetemplate {
     title: string;
     explanation: string;
     code: string;
+    private: boolean;
+    forkID: number,
+    userID: number,
     tags: { tag: string }[];
+    blogs: { id: number, title: string, userID: number }[];
 }
 
 export default function codetemplates() {
@@ -290,6 +294,15 @@ export default function codetemplates() {
                                         Run
                                     </button>
                                 </div>
+                                <div className="text-center mt-6">Linked Blogs</div>
+                                <div className="flex flex-row flex-wrap gap-2 mt-2">
+                                    {g.blogs.map((gb) => (
+                                        <div key={gb.id} className="bg-slate-300 px-4 py-2"
+                                            onClick={() => router.push(`/blogs/${gb.id}`)}
+                                        >{`${gb.id}: ${gb.title}`}</div>
+                                    ))}
+                                </div>
+                                <div></div>
                             </div>
                         ))
                         )}

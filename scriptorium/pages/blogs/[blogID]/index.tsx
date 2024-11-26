@@ -647,7 +647,7 @@ export default function BlogPost() {
         }
         fetchComments();
         fetchCommentRatings();
-    }, [reloadComments]);
+    }, [reloadComments, sortMethod]);
 
     // rating effects 
     useEffect(() => {
@@ -747,6 +747,7 @@ export default function BlogPost() {
                             <option>controversial</option>
                         </select>
                     </div>
+                    <div>{sortMethod}</div>
 
                 </div>
 

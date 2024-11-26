@@ -9,6 +9,7 @@ interface codetemplate {
     explanation: string;
     code: string;
     tags: { tag: string }[];
+    blogs: { id: number, title: string, userID: number }[];
 }
 
 interface codetemplatepagep {
@@ -40,6 +41,14 @@ const codetemplatepagee: React.FC<codetemplatepagep> = ({ template }) => {
                         onClick={run}>
                         run
                     </button>
+                </div>
+                <div className="text-center mt-6">Linked Blogs</div>
+                <div className="flex flex-row flex-wrap gap-2 mt-2">
+                    {template.blogs.map((gb) => (
+                        <div key={gb.id} className="bg-slate-300 px-4 py-2"
+                            onClick={() => r.push(`/blogs/${gb.id}`)}
+                        >{`${gb.id}: ${gb.title}`}</div>
+                    ))}
                 </div>
             </main>
         </div>
