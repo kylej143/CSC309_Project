@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from 'next/router'
 import Navigation from '@/components/Navigation';
 import { Blog, defaultBlog } from '@/pages/blogs/index';
+import { relative } from "path";
 
 
 interface Comment {
@@ -16,6 +17,14 @@ interface Comment {
     parentCommentID: number;
     user: { id: number; username: string; avatar: number };
     CommentReport: [];
+}
+
+interface CommentRating {
+    id: number,
+    userID: number,
+    commentID: number,
+    upvote: boolean,
+    downvote: boolean
 }
 
 interface NestedComment extends Comment {
@@ -42,11 +51,8 @@ export default function BlogPost() {
 
     // comment ratings
     const [commentRatingNums, setCommentRatingNums] = useState<Map<number, number>>(new Map<number, number>());
-    const [commentRatingUpvote, setCommentRatingUpvote] = useState<Map<number, boolean>>(new Map<number, boolean>());
-
-    const [tempCommentRatings, setTempCommentRatings] = useState<Map<number, CommentRatingStorage>>(new Map<number, CommentRatingStorage>());
-    const [commentRatings, setCommentRatings] = useState<Map<number, CommentRatingStorage>>(new Map<number, CommentRatingStorage>());
-    const [test, setTest] = useState<Map<number, string>>(new Map<number, string>());
+    const [commentRatings, setCommentRatings] = useState<CommentRating[]>([]);
+    const [reloadRatings, setReloadRatings] = useState(false);
 
     const [comments, setComments] = useState<Comment[]>([]);
     const [nestedComments, setNestedComments] = useState<NestedComment[]>([]);
@@ -269,92 +275,146 @@ export default function BlogPost() {
             });
     };
 
-    // const fetchCommentRatingAll = async () => {
-    //     fetchCommentRating(21);
-    //     // for (const commentItem of comments) {
-    //     //     await fetchCommentRating(commentItem.id);
-    //     // }
-    //     // comments.forEach(async (cItem) => {
-    //     //     await fetchCommentRating(cItem.id);
-    //     // });
-    // }
 
-    // initialize comment ratingsdafldakfjlkdfjlaksdjf;kdasljf;lkdsjkfdkjkfljlkdjljdlkjldkjlkjjfdfasdkf
-    // function initializeNewCommentRatings() {
-    //     let commentRatingMap = new Map<number, CommentRatingStorage>();
-    //     comments.forEach((c) => (commentRatingMap.set(c.id, { upvote: false, downvote: true })));
-    //     setCommentRatings(commentRatingMap);
-    // }
+    const fetchCommentRatings = async () => {
+        const loggedIn = localStorage.getItem("accessToken");
+        if (loggedIn) {
 
-    // const fetchCommentRating = async (commentID: number) => {
-    //     const loggedIn = localStorage.getItem("accessToken");
-    //     if (loggedIn) {
-    //         try {
-    //             const result = await fetch(`/api/user/blogs/${numID}/comments/${commentID}/ratings`, {
-    //                 method: "GET", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` }
-    //             });
-    //             if (result.ok) {
-    //                 await result.json()
-    //                     .then((response: { id: number, userID: number, commentID: number, upvote: boolean, downvote: boolean }) => {
-    //                         commentRatingUpvote.set(commentID, response.upvote);
+            try {
+                const result = await fetch(`/api/user/blogs/${numID}/comments/ratings`, {
+                    method: "GET", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` }
+                });
 
-    //                     })
-    //             }
-    //         }
-    //         catch (error: any) {
-    //             alert(error.toString());
-    //         }
-    //     }
-    // }
+                if (result.ok) {
+                    await result.json()
+                        .then((response: CommentRating[]) => {
+                            setCommentRatings(response);
+                        });
+                }
+            }
+            catch (error: any) {
+                alert(error.toString());
+            }
 
-    // get comment ratings from api
-    // const fetchCommentRating = async () => {
+        }
 
-    //     const loggedIn = localStorage.getItem("accessToken");
-    //     if (loggedIn) {
-
-    //         try {
-    //             // commentRatingUpvote.set(commentID, true);
-    //             const result = await fetch(`/api/user/blogs/${numID}/ratings`, {
-    //                 method: "GET", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` }
-    //             });
-
-    //             //.then((c) => commentRatingUpvote.set(commentID, false));
-
-    //             if (result.ok) {
-    //                 commentRatingUpvote.set(21, true);
-    //                 // await result.json()
-    //                 //     .then((response: { id: number, userID: number, commentID: number, upvote: boolean, downvote: boolean }) => {
-    //                 //         // commentRatings.set(commentID, { upvote: response.upvote, downvote: response.downvote });
-    //                 //         // tempCommentRatings.set(response.id, { upvote: response.upvote, downvote: response.downvote }); 
-
-    //                 //         let newCommentRatingUpvote = commentRatingUpvote;
-    //                 //         setCommentRatingUpvote(newCommentRatingUpvote.set(commentID, response.upvote));
-    //                 //     });
-    //             }
-    //         }
-    //         catch (error: any) {
-    //             alert(error.toString());
-    //         }
-
-    //     }
-
-    // };
+    }
 
     // upvote comment ui
-    // const changeCommentUpvoteUI = () => {
-    //     comments.forEach((c) => {
-    //         const change = document.querySelectorAll(`#commentUpvote${c.id}`);
-    //         if (commentRatingUpvote.get(c.id) === true) {
-    //             alert("tried change")
-    //             change[0].classList.add("rateSelected");
-    //         }
-    //         else if (commentRatingUpvote.get(c.id) === false) {
-    //             change[0].classList.remove("rateSelected"); ///
-    //         }
+    function changeCommentUpvoteUI(id: number) {
+        const filteredRatings = commentRatings.filter((c) => c.commentID === id);
+        if (filteredRatings.length > 0) {
+            const item = filteredRatings[0];
+            if (item.upvote === true) {
+                return "rateSelected"
+            }
+            else if (item.upvote === false) {
+                return "";
+            }
 
-    //     })
-    // }
+        }
+        return "";
+
+    }
+
+    // change downvote ui
+    const changeCommentDownvoteUI = (id: number) => {
+        const filteredRatings = commentRatings.filter((c) => c.commentID === id);
+        if (filteredRatings.length > 0) {
+            const item = filteredRatings[0];
+            if (item.downvote === true) {
+                return "rateSelected"
+            }
+            else if (item.downvote === false) {
+                return "";
+            }
+
+        }
+        return "";
+    }
+
+    const toggleCommentUpvote = async (id: number) => {
+        const loggedIn = localStorage.getItem("accessToken");
+        if (!loggedIn) {
+            alert("please log in");
+        }
+        const filteredRatings = commentRatings.filter((c) => c.commentID === id);
+        let attemptedChange;
+        if (filteredRatings.length > 0) {
+            const item = filteredRatings[0];
+
+            attemptedChange = !item.upvote;
+
+            if (attemptedChange == true && item.downvote === true) {
+                return;
+            }
+
+        }
+        else {
+            attemptedChange = true;
+        }
+
+        const response = await fetch(`/api/user/blogs/${numID}/comments/${id}`,
+            {
+                method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` },
+                body: JSON.stringify({
+                    "upvote": attemptedChange,
+                    "downvote": false
+                }),
+            }
+        );
+
+        if (response.ok) {
+            fetchComments();
+            fetchCommentRatings();
+        }
+        else {
+            const data = await response.json();
+            alert(data.error);
+        }
+    }
+
+
+    const toggleCommentDownvote = async (id: number) => {
+        const loggedIn = localStorage.getItem("accessToken");
+        if (!loggedIn) {
+            alert("please log in");
+        }
+        const filteredRatings = commentRatings.filter((c) => c.commentID === id);
+        let attemptedChange;
+        if (filteredRatings.length > 0) {
+            const item = filteredRatings[0];
+
+            attemptedChange = !item.downvote;
+
+            if (attemptedChange == true && item.upvote === true) {
+                return;
+            }
+
+        }
+        else {
+            attemptedChange = true;
+        }
+
+        const response = await fetch(`/api/user/blogs/${numID}/comments/${id}`,
+            {
+                method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` },
+                body: JSON.stringify({
+                    "upvote": false,
+                    "downvote": attemptedChange
+                }),
+            }
+        );
+
+        if (response.ok) {
+            fetchComments();
+            fetchCommentRatings();
+        }
+        else {
+            const data = await response.json();
+            alert(data.error);
+        }
+    }
 
     // change comment data into a more useful structure   
     // logic from https://stackoverflow.com/questions/36829778/rendering-nested-threaded-comments-in-react
@@ -367,7 +427,7 @@ export default function BlogPost() {
 
         comments.forEach((c) => {
             if (c.parentCommentID !== null) {
-                // get the parent comment, and add the current comment as its child woo
+                // get the parent comment, and add the current comment as its child
                 let parentComment = nestedComments.filter((nc) => nc.id === c.parentCommentID)[0];
                 parentComment.children = (parentComment.children).concat([{ ...c, children: [] }]);
             }
@@ -416,6 +476,7 @@ export default function BlogPost() {
     }
 
     function NestedComment(props: { head: number, parent: any, id: number, author: string, avatar: number, content: string }) {
+
         let parentCheck = false;
 
         if (props.head === -1) {
@@ -437,20 +498,22 @@ export default function BlogPost() {
                             <div className="flex ml-4 items-center">{props.content}</div>
                         </div>
                         <div className="ratings flex flex-row items-center mt-2 mb-2">
-                            <button id={`commentUpvote${props.id}`} className="rateButton upvote commentRatings">
+                            <button id={`commentUpvote${props.id}`}
+                                className={`rateButton upvote commentRatings ${changeCommentUpvoteUI(props.id)}`}
+                                onClick={(e) => toggleCommentUpvote(props.id)}>
                                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" className="fill-black">
                                     <path d="M440-160v-487L216-423l-56-57 320-320 320 320-56 57-224-224v487h-80Z" />
                                 </svg>
                             </button>
                             <div className="ml-2 mr-2">{commentRatingNums.get(props.id)}</div>
-                            <button id={`commentDownvote${props.id}`} className="rateButton downvote commentRatings">
+                            <button id={`commentDownvote${props.id}`}
+                                className={`rateButton downvote commentRatings ${changeCommentDownvoteUI(props.id)}`}
+                                onClick={(e) => toggleCommentDownvote(props.id)}>
                                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" className="fill-black">
                                     <path d="M440-800v487L216-537l-56 57 320 320 320-320-56-57-224 224v-487h-80Z" />
                                 </svg>
                             </button>
-                            {/* <div>{commentRatingNums.get(props.id)?.toString()}</div>
-                            <div>{commentRatingUpvote.get(props.id)?.toString()}</div> */}
-                            {/* <div>{(commentRatings.get(props.id   ))?.downvote.toString()}</div> */}
+
                         </div>
                         <div>Reply</div>
                         <input type="text" className="blogSearch w-full" onKeyDown={(e) => { if (e.key === 'Enter') { addComment(props.id) } }}
@@ -477,7 +540,6 @@ export default function BlogPost() {
             );
         }
         else {
-            // <div className="w-10 flex-none"></div>
             return <div></div>
         }
     }
@@ -491,7 +553,7 @@ export default function BlogPost() {
         fetchVisitor();
         fetchComments();
         fetchBlogRating();
-        // fetchCommentRatingAll();
+        fetchCommentRatings();
     }, [blogID]);
 
     useEffect(() => {
@@ -510,8 +572,6 @@ export default function BlogPost() {
         }
         restructureComments();
         initializeNewComments();
-        // initializeNewCommentRatings(); 
-        // fetchCommentRatingAll();
     }, [comments]);
 
     useEffect(() => {
@@ -519,6 +579,7 @@ export default function BlogPost() {
             return;
         }
         fetchComments();
+        fetchCommentRatings();
     }, [reloadComments]);
 
     // rating effects 
@@ -555,17 +616,6 @@ export default function BlogPost() {
         fetchBlogOnlyRating();
         changeDownvoteUI();
     }, [downvote]);
-
-    // useEffect(() => {
-    //     if (!blogID) {
-    //         return;
-    //     }
-    //     if (!comments) {
-    //         return;
-    //     }
-    //     fetchCommentRatingAll();
-    //     changeCommentUpvoteUI();
-    // }, [commentRatingUpvote]);
 
     return (
         <div className="h-screen flex flex-col">
@@ -613,8 +663,6 @@ export default function BlogPost() {
                         <path d="M440-800v487L216-537l-56 57 320 320 320-320-56-57-224 224v-487h-80Z" />
                     </svg>
                 </button>
-                <div>{upvote.toString()}</div>
-                <div>{downvote.toString()}</div>
             </div>
             <div className="p-4 bg-green-100">{blog.content}</div>
             <div className="p-4">

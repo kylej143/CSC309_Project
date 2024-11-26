@@ -93,3 +93,7 @@ body {
 .rateButton.downvote.rateSelected {
   @apply bg-gray-400;
 }
+
+/* #commentUpvote21 {
+  @apply bg-blue-200;
+} */
