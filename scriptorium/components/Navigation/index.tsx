@@ -6,9 +6,13 @@ import React from "react";
 export default function Navigation() {
 
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
-        setIsLoggedIn(Boolean(localStorage.getItem("accessToken")));
+        const t = localStorage.getItem("accessToken");
+        const a = localStorage.getItem("isAdmin");
+        setIsLoggedIn(Boolean(t));
+        setIsAdmin(a === "true");
     }, []);
 
     return (
@@ -22,6 +26,7 @@ export default function Navigation() {
                 {isLoggedIn ? <Link href="/blogs/create-blog" >Create Blog</Link> : null}
                 {isLoggedIn ? null : <Link href="/register">Register</Link>}
                 {isLoggedIn ? <Link href="/user">Profile</Link> : null}
+                {isAdmin ? <Link href ="/sort">Sort by report</Link>:null}
                 {isLoggedIn ? <Link onClick={() => localStorage.clear()} href="/login">Logout</Link> : <Link href="/login">Login</Link>}
             </nav>
         </>
