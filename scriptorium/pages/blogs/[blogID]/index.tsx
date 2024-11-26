@@ -39,6 +39,7 @@ export default function BlogPost() {
     const [blog, setBlog] = useState<Blog>(defaultBlog);
     const [username, setUsername] = useState<String>("");
     const [authorMatch, setAuthorMatch] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
     const [ratingNum, setRatingNum] = useState<Number>(0);
 
     // blog ratings
@@ -105,12 +106,19 @@ export default function BlogPost() {
     }
 
     // check if the user matches the author - if not, should not show edit or delete buttons
+    // also checks if user is admin
     function checkAuthorMatch() {
         if (blog.user.username === username && blog.id !== 0 && username !== "") {
             setAuthorMatch(true);
         }
         else {
             setAuthorMatch(false);
+        }
+        if (username === "admin1") {
+            setIsAdmin(true);
+        }
+        else {
+            setIsAdmin(false);
         }
     }
 
@@ -264,14 +272,19 @@ export default function BlogPost() {
     const fetchComments = async () => {
         const searchRequest = new URLSearchParams();
         searchRequest.append("sort", sortMethod);
-        await fetch(`/api/user/blogs/${numID}/comments?${searchRequest.toString()}`, {
-            method: "GET"
-        })
-            .then((response) => response.json())
-            .then((c: Comment[]) => {
-                setComments(c);
-                c.forEach((cItem) => (commentRatingNums.set(cItem.id, (cItem.up - cItem.down))));
-            });
+        try {
+            await fetch(`/api/user/blogs/${numID}/comments?${searchRequest.toString()}`, {
+                method: "GET"
+            })
+                .then((response) => response.json())
+                .then((c: Comment[]) => {
+                    setComments(c);
+                    c.forEach((cItem) => (commentRatingNums.set(cItem.id, (cItem.up - cItem.down))));
+                });
+        }
+        catch (error: any) {
+            alert(error.toString())
+        }
     };
 
 
@@ -456,7 +469,7 @@ export default function BlogPost() {
             );
 
             if (response.ok) {
-                alert("successfully saved");
+                // alert("successfully saved");
                 setReloadComments(!reloadComments);
             }
             else {
@@ -541,9 +554,9 @@ export default function BlogPost() {
                         </div>
                         <div>Reply</div>
                         <input type="text" className="blogSearch w-full" onKeyDown={(e) => { if (e.key === 'Enter') { addComment(props.id) } }}
-                            onChange={(e) => (setNewComments(newComments.set(props.id, e.target.value)))}>{newComments.get(props.id)}</input>
+                            onChange={(e) => (setNewComments(newComments.set(props.id, e.target.value)))}></input>
                         <button
-                            className="bg-pink-600 text-white"
+                            className="bg-pink-600 text-white p-1 mt-2 rounded-md"
                             onClick={op}>
                             report
                         </button>
@@ -728,7 +741,6 @@ export default function BlogPost() {
                     <div className="ml-2">
                         <select id="sort-filter" onChange={(e) => {
                             setSortMethod(e.target.value);
-                            setReloadComments(!reloadComments);
                         }}>
                             <option>valued</option>
                             <option>recent</option>

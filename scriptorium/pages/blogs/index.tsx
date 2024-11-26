@@ -320,17 +320,27 @@ export default function Blogs() {
                                     <p className="text-neutral-500">{t.tag}</p>
                                 ))}
                             </div>
+
+                            <div>
+                                <p className="font-bold">Code Templates:</p>
+                                {blog.templates.map((t) => (
+                                    <p className="text-neutral-500">{`${t.id}: ${t.title}`}</p>
+                                ))}
+                            </div>
+
                             <div className="flex flex-row">
                                 <div className="flex flex-row gap-2 items-center border-2 p-1 rounded-md bg-gray-200">
                                     <img src={`/avatars/avatar${blog.user.avatar}.png`} alt={`${blog.user.avatar}`} />
                                     <div>{blog.user.username}</div>
                                 </div>
-                                <button
-                                    className="bg-pink-600 text-white"
-                                    onClick={(e) => { e.stopPropagation(); op(blog.id); }}>
-                                    report
-                                </button>
+
                             </div>
+
+                            <button
+                                className="bg-pink-600 text-white p-1 mt-2 rounded-md"
+                                onClick={(e) => { e.stopPropagation(); op(blog.id); }}>
+                                report
+                            </button>
                         </div>
                     ))}
                 </div>
@@ -356,12 +366,6 @@ export default function Blogs() {
                                 onClick={report}>
                                 report
                             </button>
-                            <div>
-                                <p className="font-bold">Code Templates:</p>
-                                {blog.templates.map((t) => (
-                                    <p className="text-neutral-500">{`${t.id}: ${t.title}`}</p>
-                                ))}
-                            </div>
                         </div>
                     </div>
                 </div>
