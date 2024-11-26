@@ -22,6 +22,11 @@ interface NestedComment extends Comment {
     children: NestedComment[];
 }
 
+interface CommentRatingStorage {
+    upvote: boolean;
+    downvote: boolean;
+}
+
 export default function BlogPost() {
 
     const [blog, setBlog] = useState<Blog>(defaultBlog);
@@ -29,10 +34,19 @@ export default function BlogPost() {
     const [authorMatch, setAuthorMatch] = useState(false);
     const [ratingNum, setRatingNum] = useState<Number>(0);
 
+    // blog ratings
     const [tempUpvote, setTempUpvote] = useState(false);
     const [tempDownvote, setTempDownvote] = useState(false);
     const [upvote, setUpvote] = useState(false);
     const [downvote, setDownvote] = useState(false);
+
+    // comment ratings
+    const [commentRatingNums, setCommentRatingNums] = useState<Map<number, number>>(new Map<number, number>());
+    const [commentRatingUpvote, setCommentRatingUpvote] = useState<Map<number, boolean>>(new Map<number, boolean>());
+
+    const [tempCommentRatings, setTempCommentRatings] = useState<Map<number, CommentRatingStorage>>(new Map<number, CommentRatingStorage>());
+    const [commentRatings, setCommentRatings] = useState<Map<number, CommentRatingStorage>>(new Map<number, CommentRatingStorage>());
+    const [test, setTest] = useState<Map<number, string>>(new Map<number, string>());
 
     const [comments, setComments] = useState<Comment[]>([]);
     const [nestedComments, setNestedComments] = useState<NestedComment[]>([]);
@@ -45,14 +59,19 @@ export default function BlogPost() {
 
     // fetch blog info from api
     const fetchBlog = async () => {
-        await fetch(`/api/user/blogs/${numID}`, {
-            method: "GET"
-        })
-            .then((response) => response.json())
-            .then((b: Blog) => {
-                setBlog(b);
-                setRatingNum(b.up - b.down);
-            });
+        try {
+            await fetch(`/api/user/blogs/${numID}`, {
+                method: "GET"
+            })
+                .then((response) => response.json())
+                .then((b: Blog) => {
+                    setBlog(b);
+                    setRatingNum(b.up - b.down);
+                });
+        }
+        catch (error) {
+            router.push(`/blogs`);
+        }
     };
 
     // fetch blog, set rating only
@@ -163,29 +182,29 @@ export default function BlogPost() {
         }
     }
 
-    // upvote ui
+    // upvote blog ui
     const changeUpvoteUI = () => {
-        const dropdown = document.querySelectorAll(".upvote");
+        const change = document.querySelectorAll(".upvote.blogRatings");
         if (upvote) {
-            dropdown[0].classList.add("rateSelected");
+            change[0].classList.add("rateSelected");
         }
         else {
-            dropdown[0].classList.remove("rateSelected");
+            change[0].classList.remove("rateSelected");
         }
     }
 
-    // downvote ui
+    // downvote blog ui
     const changeDownvoteUI = () => {
-        const dropdown = document.querySelectorAll(".downvote");
+        const change = document.querySelectorAll(".downvote.blogRatings");
         if (downvote) {
-            dropdown[0].classList.add("rateSelected");
+            change[0].classList.add("rateSelected");
         }
         else {
-            dropdown[0].classList.remove("rateSelected");
+            change[0].classList.remove("rateSelected");
         }
     }
 
-    // make an upvote or downvote
+    // upvote or downvote blog post
     const tryRating = async (up: boolean, down: boolean, type: string) => {
 
         const loggedIn = localStorage.getItem("accessToken");
@@ -242,10 +261,102 @@ export default function BlogPost() {
             method: "GET"
         })
             .then((response) => response.json())
-            .then((c: Comment[]) => setComments(c));
+            .then((c: Comment[]) => {
+                setComments(c);
+                // initializeNewCommentRatings();
+                c.forEach((cItem) => (commentRatingNums.set(cItem.id, (cItem.up - cItem.down))));
+                // c.forEach((cItem) => (commentRatingUpvote.set(cItem.id, false)));
+            });
     };
 
-    // change comment data into a more useful structure
+    // const fetchCommentRatingAll = async () => {
+    //     fetchCommentRating(21);
+    //     // for (const commentItem of comments) {
+    //     //     await fetchCommentRating(commentItem.id);
+    //     // }
+    //     // comments.forEach(async (cItem) => {
+    //     //     await fetchCommentRating(cItem.id);
+    //     // });
+    // }
+
+    // initialize comment ratingsdafldakfjlkdfjlaksdjf;kdasljf;lkdsjkfdkjkfljlkdjljdlkjldkjlkjjfdfasdkf
+    // function initializeNewCommentRatings() {
+    //     let commentRatingMap = new Map<number, CommentRatingStorage>();
+    //     comments.forEach((c) => (commentRatingMap.set(c.id, { upvote: false, downvote: true })));
+    //     setCommentRatings(commentRatingMap);
+    // }
+
+    // const fetchCommentRating = async (commentID: number) => {
+    //     const loggedIn = localStorage.getItem("accessToken");
+    //     if (loggedIn) {
+    //         try {
+    //             const result = await fetch(`/api/user/blogs/${numID}/comments/${commentID}/ratings`, {
+    //                 method: "GET", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` }
+    //             });
+    //             if (result.ok) {
+    //                 await result.json()
+    //                     .then((response: { id: number, userID: number, commentID: number, upvote: boolean, downvote: boolean }) => {
+    //                         commentRatingUpvote.set(commentID, response.upvote);
+
+    //                     })
+    //             }
+    //         }
+    //         catch (error: any) {
+    //             alert(error.toString());
+    //         }
+    //     }
+    // }
+
+    // get comment ratings from api
+    // const fetchCommentRating = async () => {
+
+    //     const loggedIn = localStorage.getItem("accessToken");
+    //     if (loggedIn) {
+
+    //         try {
+    //             // commentRatingUpvote.set(commentID, true);
+    //             const result = await fetch(`/api/user/blogs/${numID}/ratings`, {
+    //                 method: "GET", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` }
+    //             });
+
+    //             //.then((c) => commentRatingUpvote.set(commentID, false));
+
+    //             if (result.ok) {
+    //                 commentRatingUpvote.set(21, true);
+    //                 // await result.json()
+    //                 //     .then((response: { id: number, userID: number, commentID: number, upvote: boolean, downvote: boolean }) => {
+    //                 //         // commentRatings.set(commentID, { upvote: response.upvote, downvote: response.downvote });
+    //                 //         // tempCommentRatings.set(response.id, { upvote: response.upvote, downvote: response.downvote }); 
+
+    //                 //         let newCommentRatingUpvote = commentRatingUpvote;
+    //                 //         setCommentRatingUpvote(newCommentRatingUpvote.set(commentID, response.upvote));
+    //                 //     });
+    //             }
+    //         }
+    //         catch (error: any) {
+    //             alert(error.toString());
+    //         }
+
+    //     }
+
+    // };
+
+    // upvote comment ui
+    // const changeCommentUpvoteUI = () => {
+    //     comments.forEach((c) => {
+    //         const change = document.querySelectorAll(`#commentUpvote${c.id}`);
+    //         if (commentRatingUpvote.get(c.id) === true) {
+    //             alert("tried change")
+    //             change[0].classList.add("rateSelected");
+    //         }
+    //         else if (commentRatingUpvote.get(c.id) === false) {
+    //             change[0].classList.remove("rateSelected"); ///
+    //         }
+
+    //     })
+    // }
+
+    // change comment data into a more useful structure   
     // logic from https://stackoverflow.com/questions/36829778/rendering-nested-threaded-comments-in-react
     function restructureComments() {
         let nestedComments: NestedComment[] = [];
@@ -299,6 +410,11 @@ export default function BlogPost() {
         }
     }
 
+    function initializeNewComments() {
+        let newCommentMap = new Map<number, string>();
+        comments.forEach((c) => (newCommentMap.set(c.id, "")));
+    }
+
     function NestedComment(props: { head: number, parent: any, id: number, author: string, avatar: number, content: string }) {
         let parentCheck = false;
 
@@ -319,6 +435,22 @@ export default function BlogPost() {
                                 <div>{props.author}</div>
                             </div>
                             <div className="flex ml-4 items-center">{props.content}</div>
+                        </div>
+                        <div className="ratings flex flex-row items-center mt-2 mb-2">
+                            <button id={`commentUpvote${props.id}`} className="rateButton upvote commentRatings">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" className="fill-black">
+                                    <path d="M440-160v-487L216-423l-56-57 320-320 320 320-56 57-224-224v487h-80Z" />
+                                </svg>
+                            </button>
+                            <div className="ml-2 mr-2">{commentRatingNums.get(props.id)}</div>
+                            <button id={`commentDownvote${props.id}`} className="rateButton downvote commentRatings">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" className="fill-black">
+                                    <path d="M440-800v487L216-537l-56 57 320 320 320-320-56-57-224 224v-487h-80Z" />
+                                </svg>
+                            </button>
+                            {/* <div>{commentRatingNums.get(props.id)?.toString()}</div>
+                            <div>{commentRatingUpvote.get(props.id)?.toString()}</div> */}
+                            {/* <div>{(commentRatings.get(props.id   ))?.downvote.toString()}</div> */}
                         </div>
                         <div>Reply</div>
                         <input type="text" className="blogSearch w-full" onKeyDown={(e) => { if (e.key === 'Enter') { addComment(props.id) } }}
@@ -350,11 +482,6 @@ export default function BlogPost() {
         }
     }
 
-    function initializeNewComments() {
-        let newCommentMap = new Map<number, string>();
-        comments.forEach((c) => (newCommentMap.set(c.id, "")));
-    }
-
 
     useEffect(() => {
         if (!blogID) {
@@ -364,6 +491,7 @@ export default function BlogPost() {
         fetchVisitor();
         fetchComments();
         fetchBlogRating();
+        // fetchCommentRatingAll();
     }, [blogID]);
 
     useEffect(() => {
@@ -377,8 +505,13 @@ export default function BlogPost() {
         if (!blogID) {
             return;
         }
+        if (!comments) {
+            return;
+        }
         restructureComments();
         initializeNewComments();
+        // initializeNewCommentRatings(); 
+        // fetchCommentRatingAll();
     }, [comments]);
 
     useEffect(() => {
@@ -423,6 +556,17 @@ export default function BlogPost() {
         changeDownvoteUI();
     }, [downvote]);
 
+    // useEffect(() => {
+    //     if (!blogID) {
+    //         return;
+    //     }
+    //     if (!comments) {
+    //         return;
+    //     }
+    //     fetchCommentRatingAll();
+    //     changeCommentUpvoteUI();
+    // }, [commentRatingUpvote]);
+
     return (
         <div className="h-screen flex flex-col">
             <Navigation></Navigation>
@@ -447,20 +591,21 @@ export default function BlogPost() {
                 </div>
             </div>
             <div className="ratings p-4 border-2 flex flex-row items-center">
-                <button className="rateButton upvote"
+                <button className="rateButton upvote blogRatings"
                     onClick={(e) => setTempUpvote(!upvote)}>
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" className="fill-black">
                         <path d="M440-160v-487L216-423l-56-57 320-320 320 320-56 57-224-224v487h-80Z" />
                     </svg>
                 </button>
                 <div className="ml-2 mr-2">{Number(ratingNum)}</div>
-                <button className="rateButton downvote"
+                <button className="rateButton downvote blogRatings"
                     onClick={(e) => setTempDownvote(!downvote)}>
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" className="fill-black">
                         <path d="M440-800v487L216-537l-56 57 320 320 320-320-56-57-224 224v-487h-80Z" />
                     </svg>
                 </button>
-
+                <div>{upvote.toString()}</div>
+                <div>{downvote.toString()}</div>
             </div>
             <div className="p-4 bg-green-100">{blog.content}</div>
             <div className="p-4">
