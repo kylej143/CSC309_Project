@@ -41,6 +41,7 @@ export default function BlogPost() {
     const [authorMatch, setAuthorMatch] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const [ratingNum, setRatingNum] = useState<Number>(0);
+    const [hideReload, setHideReload] = useState(false);
 
     // blog ratings
     const [tempUpvote, setTempUpvote] = useState(false);
@@ -65,9 +66,10 @@ export default function BlogPost() {
 
     // fetch blog info from api
     const fetchBlog = async () => {
+        const loggedIn = localStorage.getItem("accessToken");
         try {
             await fetch(`/api/user/blogs/${numID}`, {
-                method: "GET"
+                method: "GET", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` }
             })
                 .then((response) => response.json())
                 .then((b: Blog) => {
@@ -82,8 +84,9 @@ export default function BlogPost() {
 
     // fetch blog, set rating only
     const fetchBlogOnlyRating = async () => {
+        const loggedIn = localStorage.getItem("accessToken");
         await fetch(`/api/user/blogs/${numID}`, {
-            method: "GET"
+            method: "GET", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` }
         })
             .then((response) => response.json())
             .then((b: Blog) => {
@@ -266,6 +269,36 @@ export default function BlogPost() {
             else if (type === "downvote") { setTempDownvote(downvote); }
         }
 
+    }
+
+    // admin hide blog post
+    const hideBlogPost = async () => {
+        const loggedIn = localStorage.getItem("accessToken");
+
+        const response = await fetch(`/api/admin/blogs/${numID}`,
+            {
+                method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` },
+                body: JSON.stringify({
+                    "hide": !blog.hide,
+                })
+            }
+        );
+
+        if (response.ok) {
+            if (blog.hide === false) {
+                alert("blog hidden");
+            }
+            else {
+                alert("blog unhidden");
+            }
+            setHideReload(!hideReload);
+
+        }
+        else {
+            const data = await response.json();
+            alert(data.error);
+
+        }
     }
 
     // get comments from api
@@ -621,7 +654,7 @@ export default function BlogPost() {
         fetchComments();
         fetchBlogRating();
         fetchCommentRatings();
-    }, [blogID]);
+    }, [blogID, hideReload]);
 
     useEffect(() => {
         if (!blogID) {
@@ -731,6 +764,15 @@ export default function BlogPost() {
                         <path d="M440-800v487L216-537l-56 57 320 320 320-320-56-57-224 224v-487h-80Z" />
                     </svg>
                 </button>
+                <div className="flex-1"></div>
+                <div>
+                    {isAdmin ?
+                        <button className="bg-orange-500 text-white p-1 mt-2 rounded-md"
+                            onClick={() => hideBlogPost()}>{`ADMIN: ${blog.hide === true ? "un" : ""}hide post`}</button>
+                        :
+                        <div></div>
+                    }
+                </div>
             </div>
             <div className="p-4 bg-green-100">{blog.content}</div>
             <div className="p-4">

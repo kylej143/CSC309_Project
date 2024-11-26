@@ -333,14 +333,17 @@ export default function Blogs() {
                                     <img src={`/avatars/avatar${blog.user.avatar}.png`} alt={`${blog.user.avatar}`} />
                                     <div>{blog.user.username}</div>
                                 </div>
-
                             </div>
 
-                            <button
-                                className="bg-pink-600 text-white p-1 mt-2 rounded-md"
-                                onClick={(e) => { e.stopPropagation(); op(blog.id); }}>
-                                report
-                            </button>
+                            <div className="flex flex-row gap-2 items-center mt-2">
+                                <button
+                                    className="bg-pink-600 text-white p-1 rounded-md"
+                                    onClick={(e) => { e.stopPropagation(); op(blog.id); }}>
+                                    report
+                                </button>
+                                <div className="p-1 rounded-md text-orange-600">{blog.hide === true ? "hidden" : ""}</div>
+                            </div>
+
                         </div>
                     ))}
                 </div>
