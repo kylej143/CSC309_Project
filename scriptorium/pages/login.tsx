@@ -24,9 +24,9 @@ export default function Login() {
 
         if (refreshToken && accessToken) {
             // for admin login
-            if (password === "Admin1psss") {
+            if(password === "Admin1psss"){
                 localStorage.setItem("isAdmin", "true");
-            } else {
+            }else{
                 localStorage.setItem("isAdmin", "false");
             }
             push('/');
