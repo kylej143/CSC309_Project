@@ -52,12 +52,13 @@ export default function BlogPost() {
     // comment ratings
     const [commentRatingNums, setCommentRatingNums] = useState<Map<number, number>>(new Map<number, number>());
     const [commentRatings, setCommentRatings] = useState<CommentRating[]>([]);
-    const [reloadRatings, setReloadRatings] = useState(false);
 
     const [comments, setComments] = useState<Comment[]>([]);
     const [nestedComments, setNestedComments] = useState<NestedComment[]>([]);
     const [newComments, setNewComments] = useState<Map<number, string>>(new Map<number, string>());
     const [reloadComments, setReloadComments] = useState(false);
+
+    const [sortMethod, setSortMethod] = useState("valued");
 
     const router = useRouter();
     const { blogID } = router.query;
@@ -263,15 +264,15 @@ export default function BlogPost() {
 
     // get comments from api
     const fetchComments = async () => {
-        await fetch(`/api/user/blogs/${numID}/comments`, {
+        const searchRequest = new URLSearchParams();
+        searchRequest.append("sort", sortMethod);
+        await fetch(`/api/user/blogs/${numID}/comments?${searchRequest.toString()}`, {
             method: "GET"
         })
             .then((response) => response.json())
             .then((c: Comment[]) => {
                 setComments(c);
-                // initializeNewCommentRatings();
                 c.forEach((cItem) => (commentRatingNums.set(cItem.id, (cItem.up - cItem.down))));
-                // c.forEach((cItem) => (commentRatingUpvote.set(cItem.id, false)));
             });
     };
 
@@ -666,8 +667,25 @@ export default function BlogPost() {
             </div>
             <div className="p-4 bg-green-100">{blog.content}</div>
             <div className="p-4">
+
                 <div className="blogSearchTitle text-green-700">Comments</div>
-                <div className="border-2 p-2 rounded-md ">
+                <div className="flex flex-row">
+                    <div>Sort by:</div>
+                    <div className="ml-2">
+                        <select id="sort-filter" onChange={(e) => {
+                            setSortMethod(e.target.value);
+                            setReloadComments(!reloadComments);
+                        }
+                        }>
+                            <option>valued</option>
+                            <option>recent</option>
+                            <option>controversial</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div className="border-2 p-2 rounded-md mt-2">
 
                     <div>Write a comment</div>
                     <input type="text" className="blogSearch w-full" onKeyDown={(e) => { if (e.key === 'Enter') { addComment(-1) } }}
