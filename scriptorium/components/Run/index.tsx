@@ -44,20 +44,20 @@ export default function Run() {
                        value={stdin} onChange={(e) => setStdin(e.target.value)}/>
                 {Boolean(language === "java") ?
                     <input className="fixed p-3 top-44 left-1/4 right-1/2 h-8 bg-amber-300 placeholder-black"
-                           placeholder="Write your class name (Java only)!"
-                           value={stdin} onChange={(e) => setStdin(e.target.value)}/>: null}
+                           placeholder="Class name you want to run must be Main"
+                           value={className} onChange={(e) => setClassName(e.target.value)}/>: null}
                 <button className="fixed text-center top-44 left-3/4 right-24 h-8 bg-amber-300 hover:bg-amber-900"
                         onClick={RunCode}>Run
                 </button>
                 <select className="fixed text-center top-44 left-1/2 right-1/4 h-8 bg-amber-400 hover:bg-green-400"
                         onChange={(e) => setLanguage(e.target.value)} value={language}>
                     <option value="javascript">javascript</option>
-                    <option value="python">python</option>
+                    <option value="python2">python2</option>
+                    <option value="python3">python 3</option>
                     <option value="java">java</option>
                     <option value="c">c</option>
                     <option value="cpp">c++</option>
-                    <option value="css">css</option>
-                    <option value="csharp">c#</option>
+                    <option value="haskell">haskell</option>
                     <option value="go">go</option>
                     <option value="swift">swift</option>
                     <option value="rust">rust</option>
