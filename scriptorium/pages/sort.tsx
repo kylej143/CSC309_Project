@@ -44,7 +44,7 @@ export default function sort(){
                             previous
                         </button>
                         <button
-                            onClick={() => b22((n) => n + 1)}
+                            onClick={() => b22((n) => n+1)}
                             className="bg-blue-300 text-black px-4 py-2">
                             next
                         </button>
@@ -63,7 +63,7 @@ export default function sort(){
                             previous
                         </button>
                         <button
-                            onClick={() => c22((n) => n + 1)}
+                            onClick={() => c22((n) => n+1)}
                             className="bg-blue-300 text-black px-4 py-2">
                             next
                         </button>
