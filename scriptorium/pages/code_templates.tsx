@@ -2,6 +2,7 @@ import React, {useEffect} from "react";
 import { useState } from 'react';
 import { useRouter } from "next/router"; 
 import Navigation from "../components/Navigation";
+import Link from "next/link";
 // got basic style and logic help by gpt
 interface codetemplate{
     id: number;
@@ -255,7 +256,7 @@ export default function codetemplates(){
                 {ct.length === 0 ? (<p className="text-center text-black">There is no code template based on your search</p>):
                 (ct.map((g) => (
                     <div key={g.id} className="bg-blue-400  border p-4 mb-3">
-                    <h2 className="flex justify-center text-xl text-black font-bold">{g.title}</h2>
+                    <h2 className="flex justify-center text-xl text-black font-bold"><Link href={`/code_templates/${g.id}`}>{g.title}</Link></h2>
                     <p className="flex justify-center text-black mt-1">{g.explanation}</p>
                     <pre className="flex justify-center bg-white text-black p-2 mt-1">{g.code}</pre>
                     <div className="flex justify-center text-black mt-2">
