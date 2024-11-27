@@ -14,7 +14,7 @@ export interface Blog {
     user: { id: number; username: string; avatar: number };
     tags: { id: number; tag: string }[];
     templates: { id: number, title: string, explanation: string, code: string, private: boolean, forkID: number, userID: number }[];
-    BlogReport: [];
+    BlogReport: { id: number, reason: string }[];
 }
 
 export const defaultBlog: Blog = {
@@ -70,6 +70,8 @@ export default function Blogs() {
 
     // code templates
     const [codeTemplates, setCodeTemplates] = useState<{ id: number, link: string }[]>([]);
+    const [selectedCodeTemplates, setSelectedCodeTemplates] = useState<{ id: number, link: string }[]>([]);
+
     const [codeTemplateField, setCodeTemplateField] = useState<string>("");
     const [newCodeTemplateID, setNewCodeTemplateID] = useState(-1);
     const [newTemplateError, setNewTemplateError] = useState("");
@@ -99,12 +101,13 @@ export default function Blogs() {
                 searchRequest.append("tags", t.tag)
             ));
         }
-        if (codeTemplates.length !== 0) {
-            codeTemplates.map((c) => (
+        if (selectedCodeTemplates.length !== 0) {
+            selectedCodeTemplates.map((c) => (
                 searchRequest.append("templates", c.id.toString())
             ));
         }
         searchRequest.append("sort", sortMethod);
+        searchRequest.append("page", page.toString());
         const loggedIn = localStorage.getItem("accessToken");
         const response = await fetch(`/api/user/blogs/?${searchRequest.toString()}`,
             {
@@ -173,6 +176,10 @@ export default function Blogs() {
         return templateArray.concat([newTemplate]);
     }
 
+    function removeCodeTemplates(templateArray: { id: number, link: string }[], removeTemplateID: number) {
+        return templateArray.filter((t) => t.id != removeTemplateID);
+    }
+
     // add a new codetemplate to the blog
     const addNewCodeTemplate = (e: React.KeyboardEvent<HTMLInputElement>) => {
 
@@ -198,9 +205,32 @@ export default function Blogs() {
         }
     }
 
+    function checkTemplateInArray(templateArray: { id: number, link: string }[], checkTemplate: { id: number, link: string }) {
+        for (const t of templateArray) {
+            if (t.id === checkTemplate.id && t.link === checkTemplate.link) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    const updateSelectedTemplates = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const templateID = Number((e.target.id).replace("template", ""));
+        const templateToModify = codeTemplates.filter((t) => t.id == templateID)[0];
+        if (e.target.checked) {
+
+            if (!checkTemplateInArray(selectedCodeTemplates, templateToModify)) {
+                setSelectedCodeTemplates(addCodeTemplates(selectedCodeTemplates, templateToModify));
+            }
+        }
+        else {
+            setSelectedCodeTemplates(removeCodeTemplates(selectedCodeTemplates, templateID));
+        }
+    }
+
     useEffect(() => {
         fetchBlogs();
-    }, [goSearch]);
+    }, [goSearch, page]);
 
     useEffect(() => {
         fetchTags();
@@ -257,8 +287,10 @@ export default function Blogs() {
                         <div className="border-2 p-4 bg-gray-100 ">
                             <div className=" gap-2 flex-wrap">
                                 {codeTemplates.map((c) => (
-                                    <div key={`template${c}`} className="flatItem flex flex-row gap-2">
-                                        <div>{c.link}</div>
+                                    <div key={`templatediv${c.id}`} className="tagItem flex flex-row gap-2">
+                                        <input type="checkbox" id={`template${c.id}`}
+                                            onChange={updateSelectedTemplates} checked={checkTemplateInArray(selectedCodeTemplates, c)} />
+                                        <label htmlFor={`template${c.id}`}>{c.link}</label> <br></br>
                                     </div>
                                 ))}
                             </div>
@@ -290,7 +322,7 @@ export default function Blogs() {
                     </form>
                 </div>
 
-                <h1 className="text-pink-700 font-bold mb-2">{blogs.length} blogs found </h1>
+                <h1 className="text-pink-700 font-bold mb-2 flex flex-row justify-center">{`${blogs.length === 0 ? "0 blogs found" : ""}`}</h1>
                 <div className="blogList grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 col-span-2 gap-4">
                     {blogs.map((blog) => (
                         <div key={blog.id} className="blogItem" onClick={(e) => router.push(`/blogs/${blog.id}`)}>
@@ -317,14 +349,14 @@ export default function Blogs() {
                             </div>
 
 
-                            <div className="blogTags flex flex-row gap-2">
+                            <div className="blogTags flex flex-row gap-2 flex-wrap">
                                 <p className="font-bold">Tags:</p>
                                 {blog.tags.map((t) => (
                                     <p className="text-neutral-500">{t.tag}</p>
                                 ))}
                             </div>
 
-                            <div>
+                            <div className="flex flex-row gap-2 flex-wrap">
                                 <p className="font-bold">Code Templates:</p>
                                 {blog.templates.map((t) => (
                                     <p className="text-neutral-500">{`${t.id}: ${t.title}`}</p>
@@ -332,7 +364,11 @@ export default function Blogs() {
                             </div>
 
                             <div className="flex flex-row">
-                                <div className="flex flex-row gap-2 items-center border-2 p-1 rounded-md bg-gray-200">
+                                <div className="flex flex-row gap-2 items-center userItem"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        router.push(`/user/${blog.user.username}`);
+                                    }}>
                                     <img src={`/avatars/avatar${blog.user.avatar}.png`} alt={`${blog.user.avatar}`} />
                                     <div>{blog.user.username}</div>
                                 </div>
@@ -350,8 +386,16 @@ export default function Blogs() {
                         </div>
                     ))}
                 </div>
-                <div>
-
+                <div className="flex flex-row justify-center items-center gap-4 mt-4">
+                    <button className="bg-orange-300 p-2 rounded-md"
+                        onClick={() => setPage(Math.max(page - 1, 1))}>
+                        Prev
+                    </button>
+                    <div>{page}</div>
+                    <button className="bg-orange-300 p-2 rounded-md"
+                        onClick={() => setPage(page + 1)}>
+                        Next
+                    </button>
                 </div>
             </div>
             {rm && (

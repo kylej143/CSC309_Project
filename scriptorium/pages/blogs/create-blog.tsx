@@ -21,6 +21,7 @@ export default function Blogs() {
 
     // code templates
     const [codeTemplates, setCodeTemplates] = useState<{ id: number, link: string }[]>([]);
+    const [selectedCodeTemplates, setSelectedCodeTemplates] = useState<{ id: number, link: string }[]>([]);
 
     // adding new code template
     const [newCodeTemplateField, setNewCodeTemplateField] = useState("");
@@ -44,7 +45,7 @@ export default function Blogs() {
         // theoretically should not have to encounter login error, since checkLogggedIn is executed earlier
         if (loggedIn) {
             const stringTags: string[] = selectedTags.map((t) => t.tag);
-            const numTemplates: number[] = codeTemplates.map((c) => c.id);
+            const numTemplates: number[] = selectedCodeTemplates.map((c) => c.id);
             const response = await fetch('/api/user/blogs',
                 {
                     method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` },
@@ -122,6 +123,33 @@ export default function Blogs() {
         return templateArray.concat([newTemplate]);
     }
 
+    function removeCodeTemplates(templateArray: { id: number, link: string }[], removeTemplateID: number) {
+        return templateArray.filter((t) => t.id != removeTemplateID);
+    }
+
+    function checkTemplateInArray(templateArray: { id: number, link: string }[], checkTemplate: { id: number, link: string }) {
+        for (const t of templateArray) {
+            if (t.id === checkTemplate.id && t.link === checkTemplate.link) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    const updateSelectedTemplates = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const templateID = Number((e.target.id).replace("template", ""));
+        const templateToModify = codeTemplates.filter((t) => t.id == templateID)[0];
+        if (e.target.checked) {
+
+            if (!checkTemplateInArray(selectedCodeTemplates, templateToModify)) {
+                setSelectedCodeTemplates(addCodeTemplates(selectedCodeTemplates, templateToModify));
+            }
+        }
+        else {
+            setSelectedCodeTemplates(removeCodeTemplates(selectedCodeTemplates, templateID));
+        }
+    }
+
     // add a new codetemplate to the blog
     const addNewCodeTemplate = (e: React.KeyboardEvent<HTMLInputElement>) => {
 
@@ -192,6 +220,11 @@ export default function Blogs() {
                                 className="blogSearch mb-2"
                                 value={tagFilter}
                                 placeholder="Find tags"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                    }
+                                }}
                                 onChange={(e) => (setTagFilter(e.target.value))} />
                             <div className="flex flex-row gap-2 flex-wrap">
                                 {tags.map((t) => (
@@ -216,13 +249,23 @@ export default function Blogs() {
 
                         <div>Code Templates</div>
                         <div className="border-2 p-4 bg-gray-100 ">
+
                             <div className=" gap-2 flex-wrap">
+                                {codeTemplates.map((c) => (
+                                    <div key={`templatediv${c.id}`} className="tagItem flex flex-row gap-2">
+                                        <input type="checkbox" id={`template${c.id}`}
+                                            onChange={updateSelectedTemplates} checked={checkTemplateInArray(selectedCodeTemplates, c)} />
+                                        <label htmlFor={`template${c.id}`}>{c.link}</label> <br></br>
+                                    </div>
+                                ))}
+                            </div>
+                            {/* <div className=" gap-2 flex-wrap">
                                 {codeTemplates.map((c) => (
                                     <div key={`template${c}`} className="tagItem flex flex-row gap-2">
                                         <div>{c.link}</div>
                                     </div>
                                 ))}
-                            </div>
+                            </div> */}
                             <input type="text"
                                 id="newCodeTemplateItem"
                                 className="blogSearch mb-2 w-full"

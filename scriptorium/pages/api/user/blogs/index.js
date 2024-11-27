@@ -191,6 +191,27 @@ export default async function handler(req, res) {
                 }
             }
         }
+        let whereCheck;
+
+        if (req.query.username) {
+            whereCheck = {
+                title: { contains: (title || ''), },
+                content: { contains: (content || ''), },
+                user: {
+                    username: req.query.username,
+                },
+                OR: orCheck,
+                AND: andCheck,
+            }
+        }
+        else {
+            whereCheck = {
+                title: { contains: (title || ''), },
+                content: { contains: (content || ''), },
+                OR: orCheck,
+                AND: andCheck,
+            }
+        }
 
         // filtered search
         try {
@@ -200,12 +221,7 @@ export default async function handler(req, res) {
                 // ordered by difference = upvotes - downvotes
                 // in the case of a tie, the blog with more upvotes is higher
                 result = await prisma.blog.findMany({
-                    where: {
-                        title: { contains: (title || ''), },
-                        content: { contains: (content || ''), },
-                        OR: orCheck,
-                        AND: andCheck,
-                    },
+                    where: whereCheck,
                     orderBy: [
                         { difference: 'desc' },
                         { up: 'desc' },
@@ -217,12 +233,7 @@ export default async function handler(req, res) {
                 // ordered by absDifference = |upvotes - downvotes| --> smaller the difference, the more controversial it is
                 // in the case of a tie, the blog with more upvotes is higher
                 result = await prisma.blog.findMany({
-                    where: {
-                        title: { contains: (title || ''), },
-                        content: { contains: (content || ''), },
-                        OR: orCheck,
-                        AND: andCheck,
-                    },
+                    where: whereCheck,
                     orderBy: [
                         { absDifference: 'asc' },
                         { up: 'desc' },
@@ -232,12 +243,7 @@ export default async function handler(req, res) {
             }
             else {
                 result = await prisma.blog.findMany({
-                    where: {
-                        title: { contains: (title || ''), },
-                        content: { contains: (content || ''), },
-                        OR: orCheck,
-                        AND: andCheck,
-                    },
+                    where: whereCheck,
                     orderBy: [
                         { id: 'desc' }
                     ],
