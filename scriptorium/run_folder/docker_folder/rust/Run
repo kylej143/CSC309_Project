@@ -1,0 +1,9 @@
+FROM rust:1.67
+
+WORKDIR /app
+
+COPY . /app
+
+RUN rustc main.rs
+
+CMD ["./main"

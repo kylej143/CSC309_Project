@@ -1,0 +1,9 @@
+FROM gcc:14
+
+WORKDIR /app
+
+COPY . /app
+
+RUN g++ main.cpp
+
+CMD ["./a.out"
