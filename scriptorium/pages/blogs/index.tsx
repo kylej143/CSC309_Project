@@ -77,6 +77,9 @@ export default function Blogs() {
     // sort
     const [sortMethod, setSortMethod] = useState("valued");
 
+    // page
+    const [page, setPage] = useState(1);
+
     // search
     const [goSearch, setGoSearch] = useState<boolean>(false);
 
@@ -346,6 +349,9 @@ export default function Blogs() {
 
                         </div>
                     ))}
+                </div>
+                <div>
+
                 </div>
             </div>
             {rm && (

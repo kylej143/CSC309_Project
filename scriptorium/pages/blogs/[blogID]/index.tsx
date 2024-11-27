@@ -12,7 +12,7 @@ interface Comment {
     hide: boolean;
     userID: number;
     blogID: number;
-    parentCommentID: number;
+    parentCommentID: number | null;
     user: { id: number; username: string; avatar: number };
     CommentReport: [];
 }
@@ -54,6 +54,7 @@ export default function BlogPost() {
     const [commentRatings, setCommentRatings] = useState<CommentRating[]>([]);
 
     const [comments, setComments] = useState<Comment[]>([]);
+    const [commentsAll, setCommentsAll] = useState<Comment[]>([]);
     const [nestedComments, setNestedComments] = useState<NestedComment[]>([]);
     const [newComments, setNewComments] = useState<Map<number, string>>(new Map<number, string>());
     const [reloadComments, setReloadComments] = useState(false);
@@ -313,8 +314,30 @@ export default function BlogPost() {
                 .then((response) => response.json())
                 .then((c: Comment[]) => {
                     setComments(c);
+                    // c.forEach((cItem) => (commentRatingNums.set(cItem.id, (cItem.up - cItem.down))));
+                });
+        }
+        catch (error: any) {
+            alert(error.toString())
+        }
+    };
+
+    const fetchCommentsAll = async () => {
+        const searchRequest = new URLSearchParams();
+        searchRequest.append("sort", sortMethod);
+        searchRequest.append("show", "all");
+        const loggedIn = localStorage.getItem("accessToken");
+        try {
+
+            await fetch(`/api/user/blogs/${numID}/comments?${searchRequest.toString()}`, {
+                method: "GET", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` }
+            })
+                .then((response) => response.json())
+                .then((c: Comment[]) => {
+                    setCommentsAll(c);
                     c.forEach((cItem) => (commentRatingNums.set(cItem.id, (cItem.up - cItem.down))));
                 });
+
         }
         catch (error: any) {
             alert(error.toString())
@@ -412,6 +435,7 @@ export default function BlogPost() {
 
         if (response.ok) {
             fetchComments();
+            fetchCommentsAll();
             fetchCommentRatings();
         }
         else {
@@ -454,6 +478,7 @@ export default function BlogPost() {
 
         if (response.ok) {
             fetchComments();
+            fetchCommentsAll();
             fetchCommentRatings();
         }
         else {
@@ -467,11 +492,11 @@ export default function BlogPost() {
     function restructureComments() {
         let nestedComments: NestedComment[] = [];
 
-        comments.forEach((c) => nestedComments = nestedComments.concat([
+        commentsAll.forEach((c) => nestedComments = nestedComments.concat([
             { ...c, children: [] }
         ]));
 
-        comments.forEach((c) => {
+        commentsAll.forEach((c) => {
             if (c.parentCommentID !== null) {
                 // get the parent comment, and add the current comment as its child
                 let parentComment = nestedComments.filter((nc) => nc.id === c.parentCommentID)[0];
@@ -503,7 +528,7 @@ export default function BlogPost() {
             );
 
             if (response.ok) {
-                // alert("successfully saved");
+                alert("successfully added comment");
                 setReloadComments(!reloadComments);
             }
             else {
@@ -516,10 +541,10 @@ export default function BlogPost() {
         }
     }
 
-    function initializeNewComments() {
-        let newCommentMap = new Map<number, string>();
-        comments.forEach((c) => (newCommentMap.set(c.id, "")));
-    }
+    // function initializeNewComments() {
+    //     let newCommentMap = new Map<number, string>();
+    //     comments.forEach((c) => (newCommentMap.set(c.id, "")));
+    // }
 
     function NestedComment(props: { head: number, parent: any, id: number, author: string, avatar: number, content: string, hide: boolean }) {
         const [rr, sr2] = useState("");
@@ -527,6 +552,10 @@ export default function BlogPost() {
 
         const op = () => { sr(true); };
         const cl = () => { sr(false); sr2(""); };
+
+        // const shouldHide = false;afkadf
+
+        const shouldHide = ((comments.filter((checkComment) => checkComment.id === props.id)).length === 0);
 
         const report = async () => {
             const li = localStorage.getItem("accessToken");
@@ -590,51 +619,61 @@ export default function BlogPost() {
             return (
                 <div>
                     <div className="border-2 p-2 rounded-md ">
-                        <div className="flex flex-row">
-                            <div className="flex flex-row gap-2 items-center border-2 p-1 rounded-md bg-gray-200">
-                                <img src={`/avatars/avatar${props.avatar}.png`} alt={`${props.avatar}`} />
-                                <div>{props.author}</div>
+                        {shouldHide
+                            ?
+                            <div className="pt-8 pb-8">
+                                Cannot find comment
                             </div>
-                            <div className="flex ml-4 items-center">{props.content}</div>
-                        </div>
-                        <div className="ratings flex flex-row items-center mt-2 mb-2">
-                            <button id={`commentUpvote${props.id}`}
-                                className={`rateButton upvote commentRatings ${changeCommentUpvoteUI(props.id)}`}
-                                onClick={(e) => toggleCommentUpvote(props.id)}>
-                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" className="fill-black">
-                                    <path d="M440-160v-487L216-423l-56-57 320-320 320 320-56 57-224-224v487h-80Z" />
-                                </svg>
-                            </button>
-                            <div className="ml-2 mr-2">{commentRatingNums.get(props.id)}</div>
-                            <button id={`commentDownvote${props.id}`}
-                                className={`rateButton downvote commentRatings ${changeCommentDownvoteUI(props.id)}`}
-                                onClick={(e) => toggleCommentDownvote(props.id)}>
-                                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" className="fill-black">
-                                    <path d="M440-800v487L216-537l-56 57 320 320 320-320-56-57-224 224v-487h-80Z" />
-                                </svg>
-                            </button>
-
-                        </div>
-                        <div>Reply</div>
-                        <input type="text" className="blogSearch w-full" onKeyDown={(e) => { if (e.key === 'Enter') { addComment(props.id) } }}
-                            onChange={(e) => (setNewComments(newComments.set(props.id, e.target.value)))}></input>
-
-                        <div className="flex flex-row gap-2 items-center mt-2">
-                            <button
-                                className="bg-pink-600 text-white p-1 rounded-md"
-                                onClick={op}>
-                                report
-                            </button>
+                            :
                             <div>
-                                {isAdmin ?
-                                    <button className={`${props.hide === true ? "bg-orange-300" : "bg-orange-500"} text-white p-1 mt-2 rounded-md`}
-                                        onClick={() => hideComment()}>{`ADMIN: ${props.hide === true ? "un" : ""}hide comment`}</button>
-                                    :
-                                    <div></div>
-                                }
+                                <div className="flex flex-row">
+                                    <div className="flex flex-row gap-2 items-center border-2 p-1 rounded-md bg-gray-200">
+                                        <img src={`/avatars/avatar${props.avatar}.png`} alt={`${props.avatar}`} />
+                                        <div>{props.author}</div>
+                                    </div>
+                                    <div className="flex ml-4 items-center">{props.content}</div>
+                                </div>
+                                <div className="ratings flex flex-row items-center mt-2 mb-2">
+                                    <button id={`commentUpvote${props.id}`}
+                                        className={`rateButton upvote commentRatings ${changeCommentUpvoteUI(props.id)}`}
+                                        onClick={(e) => toggleCommentUpvote(props.id)}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" className="fill-black">
+                                            <path d="M440-160v-487L216-423l-56-57 320-320 320 320-56 57-224-224v487h-80Z" />
+                                        </svg>
+                                    </button>
+                                    <div className="ml-2 mr-2">{commentRatingNums.get(props.id)}</div>
+                                    <button id={`commentDownvote${props.id}`}
+                                        className={`rateButton downvote commentRatings ${changeCommentDownvoteUI(props.id)}`}
+                                        onClick={(e) => toggleCommentDownvote(props.id)}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" className="fill-black">
+                                            <path d="M440-800v487L216-537l-56 57 320 320 320-320-56-57-224 224v-487h-80Z" />
+                                        </svg>
+                                    </button>
+
+                                </div>
+                                <div>Reply</div>
+                                <input type="text" className="blogSearch w-full" onKeyDown={(e) => { if (e.key === 'Enter') { addComment(props.id) } }}
+                                    onChange={(e) => (setNewComments(newComments.set(props.id, e.target.value)))}></input>
+
+                                <div className="flex flex-row gap-2 items-center mt-2">
+                                    <button
+                                        className="bg-pink-600 text-white p-1 rounded-md"
+                                        onClick={op}>
+                                        report
+                                    </button>
+                                    <div>
+                                        {isAdmin ?
+                                            <button className={`${props.hide === true ? "bg-orange-300" : "bg-orange-500"} text-white p-1 rounded-md`}
+                                                onClick={() => hideComment()}>{`ADMIN: ${props.hide === true ? "un" : ""}hide comment`}</button>
+                                            :
+                                            <div></div>
+                                        }
+                                    </div>
+                                    <div className="p-1 rounded-md text-orange-600">{props.hide === true ? "hidden" : ""}</div>
+                                </div>
                             </div>
-                            <div className="p-1 rounded-md text-orange-600">{props.hide === true ? "hidden" : ""}</div>
-                        </div>
+                        }
+
                     </div>
                     <div className="flex flex-row">
                         <div className="w-10 flex-none"></div>
@@ -695,6 +734,7 @@ export default function BlogPost() {
         fetchBlog()
         fetchVisitor();
         fetchComments();
+        fetchCommentsAll();
         fetchBlogRating();
         fetchCommentRatings();
     }, [blogID, hideReload]);
@@ -710,18 +750,19 @@ export default function BlogPost() {
         if (!blogID) {
             return;
         }
-        if (!comments) {
+        if (!comments || !commentsAll) {
             return;
         }
         restructureComments();
-        initializeNewComments();
-    }, [comments]);
+        // initializeNewComments();  kdaf
+    }, [comments, commentsAll]);
 
     useEffect(() => {
         if (!blogID) {
             return;
         }
         fetchComments();
+        fetchCommentsAll();
         fetchCommentRatings();
     }, [reloadComments, sortMethod]);
 
@@ -810,7 +851,7 @@ export default function BlogPost() {
                 <div className="flex-1"></div>
                 <div>
                     {isAdmin ?
-                        <button className={`${blog.hide === true ? "bg-orange-300" : "bg-orange-500"} text-white p-1 mt-2 rounded-md`}
+                        <button className={`${blog.hide === true ? "bg-orange-300" : "bg-orange-500"} text-white p-1 rounded-md`}
                             onClick={() => hideBlogPost()}>{`ADMIN: ${blog.hide === true ? "un" : ""}hide post`}</button>
                         :
                         <div></div>
@@ -832,7 +873,6 @@ export default function BlogPost() {
                             <option>controversial</option>
                         </select>
                     </div>
-                    <div>{sortMethod}</div>
 
                 </div>
 

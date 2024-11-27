@@ -102,9 +102,10 @@ export default async function handler(req, res) {
     }
 
     // SORT COMMENTS
-    else if (req.method === "GET") {
+    else if (req.method === "GET" && req.query.show !== "all") {
         let sortMethod = req.query.sort;
         let page = req.query.page;
+        console.log("restricted");
 
         if (sortMethod !== "valued" && sortMethod !== "controversial" && sortMethod !== "recent") {
             sortMethod = "valued"
@@ -113,7 +114,7 @@ export default async function handler(req, res) {
         const pageSize = 10;
 
         if (!page) {
-            page = 1;
+            page = 0; // changed
         }
 
         // ensures that if the comment is hidden, it will not be visible
@@ -228,7 +229,140 @@ export default async function handler(req, res) {
                     }
                 })
             }
-            return res.status(200).json(paginateArray(comments, pageSize, page))
+            if (page === 0) {
+                return res.status(200).json(comments)
+            }
+            else {
+                return res.status(200).json(paginateArray(comments, pageSize, page))
+            }
+        }
+        catch (error) {
+            return res.status(403).json({ error: "Could not get comments" });
+        }
+
+    }
+
+    else if (req.method === "GET" && req.query.show === "all") {
+        let sortMethod = req.query.sort;
+        let page = req.query.page;
+
+        if (sortMethod !== "valued" && sortMethod !== "controversial" && sortMethod !== "recent") {
+            sortMethod = "valued"
+        }
+
+        const pageSize = 10;
+
+        if (!page) {
+            page = 0; // changed
+        }
+
+        let orCheck = [{ hide: false }, { hide: true }]
+
+        try {
+            let comments;
+
+            if (sortMethod === "valued") {
+                // ordered by difference = upvotes - downvotes
+                // in the case of a tie, the comment with more upvotes is higher
+                comments = await prisma.comment.findMany({
+                    where: {
+                        blogID: blogID,
+                        OR: orCheck,
+                    },
+                    orderBy: [
+                        { difference: 'desc' },
+                        { up: 'desc' },
+                    ],
+                    include: {
+                        difference: false,
+                        absDifference: false,
+                        user: {
+                            include: {
+                                password: false,
+                                name: false,
+                                email: false,
+                                phoneNumber: false,
+                                role: false,
+                            }
+                        },
+                        CommentReport: {
+                            include: {
+                                userID: false,
+                                commentID: false,
+                            }
+                        }
+                    }
+                })
+            }
+            else if (sortMethod === "controversial") {
+                // ordered by absDifference = |upvotes - downvotes| --> smaller the difference, the more controversial it is
+                // in the case of a tie, the comment with more upvotes is higher
+                comments = await prisma.comment.findMany({
+                    where: {
+                        blogID: blogID,
+                        OR: orCheck,
+                    },
+                    orderBy: [
+                        { absDifference: 'asc' },
+                        { up: 'desc' },
+                    ],
+                    include: {
+                        difference: false,
+                        absDifference: false,
+                        user: {
+                            include: {
+                                password: false,
+                                name: false,
+                                email: false,
+                                phoneNumber: false,
+                                role: false,
+                            }
+                        },
+                        CommentReport: {
+                            include: {
+                                userID: false,
+                                commentID: false,
+                            }
+                        }
+                    }
+                })
+            }
+            else {
+                comments = await prisma.comment.findMany({
+                    where: {
+                        blogID: blogID,
+                        OR: orCheck,
+                    },
+                    orderBy: [
+                        { id: 'desc' },
+                    ],
+                    include: {
+                        difference: false,
+                        absDifference: false,
+                        user: {
+                            include: {
+                                password: false,
+                                name: false,
+                                email: false,
+                                phoneNumber: false,
+                                role: false,
+                            }
+                        },
+                        CommentReport: {
+                            include: {
+                                userID: false,
+                                commentID: false,
+                            }
+                        }
+                    }
+                })
+            }
+            if (page === 0) {
+                return res.status(200).json(comments)
+            }
+            else {
+                return res.status(200).json(paginateArray(comments, pageSize, page))
+            }
         }
         catch (error) {
             return res.status(403).json({ error: "Could not get comments" });
