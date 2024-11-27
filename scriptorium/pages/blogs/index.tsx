@@ -105,6 +105,7 @@ export default function Blogs() {
             ));
         }
         searchRequest.append("sort", sortMethod);
+        searchRequest.append("page", page.toString());
         const loggedIn = localStorage.getItem("accessToken");
         const response = await fetch(`/api/user/blogs/?${searchRequest.toString()}`,
             {
@@ -200,7 +201,7 @@ export default function Blogs() {
 
     useEffect(() => {
         fetchBlogs();
-    }, [goSearch]);
+    }, [goSearch, page]);
 
     useEffect(() => {
         fetchTags();
@@ -290,7 +291,7 @@ export default function Blogs() {
                     </form>
                 </div>
 
-                <h1 className="text-pink-700 font-bold mb-2">{blogs.length} blogs found </h1>
+                <h1 className="text-pink-700 font-bold mb-2 flex flex-row justify-center">{`${blogs.length === 0 ? "0 blogs found" : ""}`}</h1>
                 <div className="blogList grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 col-span-2 gap-4">
                     {blogs.map((blog) => (
                         <div key={blog.id} className="blogItem" onClick={(e) => router.push(`/blogs/${blog.id}`)}>
@@ -332,7 +333,11 @@ export default function Blogs() {
                             </div>
 
                             <div className="flex flex-row">
-                                <div className="flex flex-row gap-2 items-center border-2 p-1 rounded-md bg-gray-200">
+                                <div className="flex flex-row gap-2 items-center userItem"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        router.push(`/user/${blog.user.username}`);
+                                    }}>
                                     <img src={`/avatars/avatar${blog.user.avatar}.png`} alt={`${blog.user.avatar}`} />
                                     <div>{blog.user.username}</div>
                                 </div>
@@ -350,8 +355,16 @@ export default function Blogs() {
                         </div>
                     ))}
                 </div>
-                <div>
-
+                <div className="flex flex-row justify-center items-center gap-4 mt-4">
+                    <button className="bg-orange-300 p-2 rounded-md"
+                        onClick={() => setPage(Math.max(page - 1, 1))}>
+                        Prev
+                    </button>
+                    <div>{page}</div>
+                    <button className="bg-orange-300 p-2 rounded-md"
+                        onClick={() => setPage(page + 1)}>
+                        Next
+                    </button>
                 </div>
             </div>
             {rm && (

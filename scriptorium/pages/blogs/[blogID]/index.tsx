@@ -627,7 +627,8 @@ export default function BlogPost() {
                             :
                             <div>
                                 <div className="flex flex-row">
-                                    <div className="flex flex-row gap-2 items-center border-2 p-1 rounded-md bg-gray-200">
+                                    <div className="flex flex-row gap-2 items-center userItem"
+                                        onClick={() => router.push(`/user/${props.author}`)}>
                                         <img src={`/avatars/avatar${props.avatar}.png`} alt={`${props.avatar}`} />
                                         <div>{props.author}</div>
                                     </div>
@@ -810,8 +811,8 @@ export default function BlogPost() {
                     {blog.title}
                 </div>
                 <div className="flex flex-row">
-                    <div className="flex flex-row gap-2 items-center border-2 p-1 rounded-md bg-gray-200">
-                        {/* <div className="bg-gray-400 p-1 rounded-md">{blog.user.avatar}</div> */}
+                    <div className="flex flex-row gap-2 items-center userItem"
+                        onClick={() => router.push(`/user/${blog.user.username}`)}>
                         <img src={`/avatars/avatar${blog.user.avatar}.png`} alt={`${blog.user.avatar}`} />
                         <div>{blog.user.username}</div>
                     </div>
