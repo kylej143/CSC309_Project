@@ -41,9 +41,9 @@ export default function RunSmallWindow() {
                        placeholder="Write your stdin here!"
                        value={stdin} onChange={(e) => setStdin(e.target.value)}/>
                 {Boolean(language === "java") ?
-                    <input className="fixed p-3 bottom-1/2 left-1/4 right-1/2 h-8 bg-amber-300 placeholder-black"
-                           placeholder="Class name you want to run must be Main"
-                           value={className} onChange={(e) => setClassName(e.target.value)}/>: null}
+                    <p className="fixed font-bold text-center bottom-1/2 left-1/4 right-1/2 h-8 bg-amber-300 placeholder-black">
+                        Class name you want to run must be Main
+                    </p> : null}
                 <button className="fixed text-center bottom-1/2 left-3/4 right-24 h-8 bg-amber-300 hover:bg-amber-900"
                         onClick={RunCode}>Run
                 </button>
