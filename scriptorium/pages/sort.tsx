@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import React from "react";
 import Navigation from "@/components/Navigation";
+import Link from "next/link";
 
 export default function sort(){
     const [b, sb] = useState([]);
@@ -31,11 +32,11 @@ export default function sort(){
 
     return(<><Navigation/>
             <main className="p-3">
-                <h1 className="flex justify-center font-bold">Blogs and comments here are sorted by the number fo reports.</h1>
+                <h1 className="flex justify-center font-bold">Blogs and comments here are sorted by the number of reports.</h1>
                     <section className="mb-7">
                     <h2 className="flex justify-center">blogs</h2>
                     {b3?(<p></p>):(<ul className="space-x-1 space-y-5">
-                            {b.map((blog:{id: number; title: string; flags: number}) => (<li key={blog.id} className="border p-1"><p className="text-white mb-4">title: {blog.title}</p><p>number of reports: {blog.flags}</p></li>
+                            {b.map((blog:{id: number; title: string; flags: number}) => (<li key={blog.id} className="border p-1"><Link href={`/blogs/${blog.id}`}><p className="mb-4">title: {blog.title}</p><p>number of reports: {blog.flags}</p></Link></li>
                             ))}</ul>)}
                     <div className="flex justify-center">
                         <button
@@ -53,7 +54,7 @@ export default function sort(){
                 <section>
                     <h2 className="flex justify-center">comments</h2>
                     {c3?(<p></p>):(<ul className="space-x-1 space-y-5">
-                            {c.map((comment:{id: number; content: string; flags: number}) => (<li key={comment.id} className="border p-1"><p className="text-white mb-4">title: {comment.content}</p><p>number of reports: {comment.flags}</p></li>
+                            {c.map((comment:{id: number; content: string; flags: number; blogID: number}) => (<li key={comment.id} className="border p-1"><Link href={`/blogs/${comment.blogID}`}><p className="mb-4">title: {comment.content}</p><p>number of reports: {comment.flags}</p></Link></li>
                             ))} </ul>
                     )}
                     <div className="flex justify-center">
