@@ -67,40 +67,40 @@ export default function Register() {
                 <div className="">
                     <main>
                         <div className="flex items-center bg-green-100 px-10 py-10 gap-5 text-green-700 text-2xl ">
-                            <div className="flex-1" />
+                            <div className="flex-1"/>
                             <p>View {username}'s Profile</p>
-                            <div className="flex-1" />
+                            <div className="flex-1"/>
                         </div>
                         <div className="flex items-center bg-green-100 px-10 gap-5 ">
-                            <div className="flex-1" />
+                            <div className="flex-1"/>
+                            <img className="size-20" src={`/avatars/avatar${avatar}.png`} alt={`${avatar}`}/>
+                            <div className="flex-1"/>
+                        </div>
+                        <div className="flex items-center bg-green-100 px-10 gap-5 ">
+                            <div className="flex-1"/>
                             <p>Username: {username}</p>
-                            <div className="flex-1" />
+                            <div className="flex-1"/>
                         </div>
                         <div className="flex items-center bg-green-100 px-10 gap-5 ">
-                            <div className="flex-1" />
+                            <div className="flex-1"/>
                             <p>Name: {name}</p>
-                            <div className="flex-1" />
+                            <div className="flex-1"/>
                         </div>
                         <div className="flex items-center bg-green-100 px-10 gap-5 ">
-                            <div className="flex-1" />
+                            <div className="flex-1"/>
                             <p>Email: {email}</p>
-                            <div className="flex-1" />
+                            <div className="flex-1"/>
                         </div>
                         <div className="flex items-center bg-green-100 px-10 gap-5 ">
-                            <div className="flex-1" />
-                            <p>Avatar: {String(avatar)}</p>
-                            <div className="flex-1" />
-                        </div>
-                        <div className="flex items-center bg-green-100 px-10 gap-5 ">
-                            <div className="flex-1" />
+                            <div className="flex-1"/>
                             <p>Phone Number: {String(phoneNumber)}</p>
-                            <div className="flex-1" />
+                            <div className="flex-1"/>
                         </div>
                     </main>
                 </div>
                 <div className="bg-green-100">
                     <div className="flex items-center bg-green-100 px-10 pt-10 pb-2 gap-5 text-green-700 text-2xl ">
-                        <div className="flex-1" />
+                        <div className="flex-1"/>
                         <p>Blogs</p>
                         <div className="flex-1" />
                     </div>

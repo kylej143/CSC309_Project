@@ -91,7 +91,7 @@ export default function Register() {
                 <div className="flex items-center bg-green-100 px-10 py-3 gap-5 ">
                     <div className="flex-1"/>
                     <p>Email</p>
-                    <input className="border-2 bg-green-400 border-green-700" onChange={(event) => {
+                    <input type="email" className="border-2 bg-green-400 border-green-700" onChange={(event) => {
                         setEmail(event.target.value);
                     }} value={email}/>
                     <div className="flex-1"/>
@@ -99,17 +99,43 @@ export default function Register() {
                 <div className="flex items-center bg-green-100 px-10 py-3 gap-5 ">
                     <div className="flex-1"/>
                     <p>Avatar</p>
-                    <input className="border-2 bg-green-400 border-green-700" onChange={(event) => {
-                        setAvatar(event.target.value);
-                    }} value={avatar}/>
+                    <div id="grid" className="grid p-3 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                        <div onClick={() => setAvatar("1")}
+                            className={(avatar === "1") ? "card bg-lime-300 border-2 rounded-lg shadow-lg p-4 hover:bg-lime-400" : "card bg-white border-2 rounded-lg shadow-lg p-4 hover:bg-slate-200"}>
+                            <img className="size-20" src="/avatars/avatar1.png"
+                                 alt="1"></img>
+                        </div>
+                        <div onClick={() => setAvatar("2")}
+                            className={(avatar === "2") ? "card bg-lime-300 border-2 rounded-lg shadow-lg p-4 hover:bg-lime-400" : "card bg-white border-2 rounded-lg shadow-lg p-4 hover:bg-slate-200"}>
+                            <img className="size-20" src="/avatars/avatar2.png"
+                                 alt="2"></img>
+                        </div>
+                        <div onClick={() => setAvatar("3")}
+                            className={(avatar === "3") ? "card bg-lime-300 border-2 rounded-lg shadow-lg p-4 hover:bg-lime-400" : "card bg-white border-2 rounded-lg shadow-lg p-4 hover:bg-slate-200"}>
+                            <img className="size-20" src="/avatars/avatar3.png"
+                                 alt="3"></img>
+                        </div>
+                        <div onClick={() => setAvatar("4")}
+                            className={(avatar === "4") ? "card bg-lime-300 border-2 rounded-lg shadow-lg p-4 hover:bg-lime-400" : "card bg-white border-2 rounded-lg shadow-lg p-4 hover:bg-slate-200"}>
+                            <img className="size-20" src="/avatars/avatar4.png"
+                                 alt="4"></img>
+                        </div>
+                        <div onClick={() => setAvatar("5")}
+                            className={(avatar === "5") ? "card bg-lime-300 border-2 rounded-lg shadow-lg p-4 hover:bg-lime-400" : "card bg-white border-2 rounded-lg shadow-lg p-4 hover:bg-slate-200"}>
+                            <img className="size-20" src="/avatars/avatar5.png"
+                                 alt="5"></img>
+                        </div>
+                    </div>
                     <div className="flex-1"/>
                 </div>
                 <div className="flex items-center bg-green-100 px-10 py-3 gap-5 ">
                     <div className="flex-1"/>
                     <p>Phone Number (XXX XXXX XXXX)</p>
-                    <input className="border-2 bg-green-400 border-green-700" onChange={(event) => {
-                        setPhoneNumber(event.target.value);
-                    }} value={phoneNumber}/>
+                    <input placeholder=" (optional)" type="tel"
+                           className="placeholder-black border-2 bg-green-400 border-green-700"
+                           onChange={(event) => {
+                               setPhoneNumber(event.target.value);
+                           }} value={phoneNumber}/>
                     <div className="flex-1"/>
                 </div>
                 <div className="flex items-center text-red-600 bg-green-100 px-10 gap-5 ">
