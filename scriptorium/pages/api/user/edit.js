@@ -88,7 +88,7 @@ export default async function handler(req, res) {
         if (avatar) {
             try {
                 avatar = Number(avatar)
-                if (!(1 === avatar || 2 === avatar)) {
+                if (!(1 <= avatar && 5 >= avatar)) {
                     return res.status(400).json({
                         error: "avatar must be 1 or 2, current choice of avatar does not exist",
                     });
