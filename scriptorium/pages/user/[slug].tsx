@@ -144,14 +144,14 @@ export default function Register() {
                                 </div>
 
 
-                                <div className="blogTags flex flex-row gap-2">
+                                <div className="blogTags flex flex-row gap-2 flex-wrap">
                                     <p className="font-bold">Tags:</p>
                                     {blog.tags.map((t) => (
                                         <p className="text-neutral-500">{t.tag}</p>
                                     ))}
                                 </div>
 
-                                <div>
+                                <div className="flex flex-row gap-2 flex-wrap">
                                     <p className="font-bold">Code Templates:</p>
                                     {blog.templates.map((t) => (
                                         <p className="text-neutral-500">{`${t.id}: ${t.title}`}</p>

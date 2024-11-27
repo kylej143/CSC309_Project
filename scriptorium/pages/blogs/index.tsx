@@ -70,6 +70,8 @@ export default function Blogs() {
 
     // code templates
     const [codeTemplates, setCodeTemplates] = useState<{ id: number, link: string }[]>([]);
+    const [selectedCodeTemplates, setSelectedCodeTemplates] = useState<{ id: number, link: string }[]>([]);
+
     const [codeTemplateField, setCodeTemplateField] = useState<string>("");
     const [newCodeTemplateID, setNewCodeTemplateID] = useState(-1);
     const [newTemplateError, setNewTemplateError] = useState("");
@@ -99,8 +101,8 @@ export default function Blogs() {
                 searchRequest.append("tags", t.tag)
             ));
         }
-        if (codeTemplates.length !== 0) {
-            codeTemplates.map((c) => (
+        if (selectedCodeTemplates.length !== 0) {
+            selectedCodeTemplates.map((c) => (
                 searchRequest.append("templates", c.id.toString())
             ));
         }
@@ -174,6 +176,10 @@ export default function Blogs() {
         return templateArray.concat([newTemplate]);
     }
 
+    function removeCodeTemplates(templateArray: { id: number, link: string }[], removeTemplateID: number) {
+        return templateArray.filter((t) => t.id != removeTemplateID);
+    }
+
     // add a new codetemplate to the blog
     const addNewCodeTemplate = (e: React.KeyboardEvent<HTMLInputElement>) => {
 
@@ -196,6 +202,29 @@ export default function Blogs() {
                 setNewTemplateError("");
             }
 
+        }
+    }
+
+    function checkTemplateInArray(templateArray: { id: number, link: string }[], checkTemplate: { id: number, link: string }) {
+        for (const t of templateArray) {
+            if (t.id === checkTemplate.id && t.link === checkTemplate.link) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    const updateSelectedTemplates = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const templateID = Number((e.target.id).replace("template", ""));
+        const templateToModify = codeTemplates.filter((t) => t.id == templateID)[0];
+        if (e.target.checked) {
+
+            if (!checkTemplateInArray(selectedCodeTemplates, templateToModify)) {
+                setSelectedCodeTemplates(addCodeTemplates(selectedCodeTemplates, templateToModify));
+            }
+        }
+        else {
+            setSelectedCodeTemplates(removeCodeTemplates(selectedCodeTemplates, templateID));
         }
     }
 
@@ -258,8 +287,10 @@ export default function Blogs() {
                         <div className="border-2 p-4 bg-gray-100 ">
                             <div className=" gap-2 flex-wrap">
                                 {codeTemplates.map((c) => (
-                                    <div key={`template${c}`} className="flatItem flex flex-row gap-2">
-                                        <div>{c.link}</div>
+                                    <div key={`templatediv${c.id}`} className="tagItem flex flex-row gap-2">
+                                        <input type="checkbox" id={`template${c.id}`}
+                                            onChange={updateSelectedTemplates} checked={checkTemplateInArray(selectedCodeTemplates, c)} />
+                                        <label htmlFor={`template${c.id}`}>{c.link}</label> <br></br>
                                     </div>
                                 ))}
                             </div>
@@ -318,14 +349,14 @@ export default function Blogs() {
                             </div>
 
 
-                            <div className="blogTags flex flex-row gap-2">
+                            <div className="blogTags flex flex-row gap-2 flex-wrap">
                                 <p className="font-bold">Tags:</p>
                                 {blog.tags.map((t) => (
                                     <p className="text-neutral-500">{t.tag}</p>
                                 ))}
                             </div>
 
-                            <div>
+                            <div className="flex flex-row gap-2 flex-wrap">
                                 <p className="font-bold">Code Templates:</p>
                                 {blog.templates.map((t) => (
                                     <p className="text-neutral-500">{`${t.id}: ${t.title}`}</p>
