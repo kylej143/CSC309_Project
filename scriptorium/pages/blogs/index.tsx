@@ -14,7 +14,7 @@ export interface Blog {
     user: { id: number; username: string; avatar: number };
     tags: { id: number; tag: string }[];
     templates: { id: number, title: string, explanation: string, code: string, private: boolean, forkID: number, userID: number }[];
-    BlogReport: [];
+    BlogReport: { id: number, reason: string }[];
 }
 
 export const defaultBlog: Blog = {

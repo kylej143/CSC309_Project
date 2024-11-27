@@ -14,7 +14,7 @@ interface Comment {
     blogID: number;
     parentCommentID: number | null;
     user: { id: number; username: string; avatar: number };
-    CommentReport: [];
+    CommentReport: { id: number, reason: string }[];
 }
 
 interface CommentRating {
@@ -62,9 +62,9 @@ export default function BlogPost() {
 
     const [sortMethod, setSortMethod] = useState("valued");
 
-    const [page, setPage] = useState(1);
-    // const [commentCounter, setCommentCounter] = useState(0);
+    const [toggleReports, setToggleReports] = useState(false);
 
+    const [page, setPage] = useState(1);
     const pageSize = 10;
 
     const router = useRouter();
@@ -557,12 +557,10 @@ export default function BlogPost() {
         }
     }
 
-    // function initializeNewComments() {
-    //     let newCommentMap = new Map<number, string>();
-    //     comments.forEach((c) => (newCommentMap.set(c.id, "")));
-    // }
-
-    function NestedComment(props: { head: number, parent: any, id: number, author: string, avatar: number, content: string, hide: boolean, toggleShow: boolean, page: number }) {
+    function NestedComment(props: {
+        head: number, parent: any, id: number, author: string, avatar: number, content: string, hide: boolean,
+        toggleShow: boolean, page: number, commentReports: { id: number, reason: string }[]
+    }) {
         const [rr, sr2] = useState("");
         const [rm, sr] = useState(false);
 
@@ -570,6 +568,7 @@ export default function BlogPost() {
         const cl = () => { sr(false); sr2(""); };
 
         const [toggleShow, setToggleShow] = useState(false);
+        const [toggleCommentReports, setToggleCommentReports] = useState(false);
 
         const shouldHide = ((comments.filter((checkComment) => checkComment.id === props.id)).length === 0);
 
@@ -671,9 +670,6 @@ export default function BlogPost() {
                                             </button>
 
                                         </div>
-                                        <div>Reply</div>
-                                        <input type="text" className="blogSearch w-full" onKeyDown={(e) => { if (e.key === 'Enter') { addComment(props.id) } }}
-                                            onChange={(e) => (setNewComments(newComments.set(props.id, e.target.value)))}></input>
 
                                         <div className="flex flex-row gap-2 items-center mt-2">
                                             <button
@@ -691,13 +687,32 @@ export default function BlogPost() {
                                             </div>
                                             <div className="p-1 rounded-md text-orange-600">{props.hide === true ? "hidden" : ""}</div>
                                         </div>
+                                        <div>
+                                            {(isAdmin || username === props.author) && props.commentReports.length > 0
+                                                ?
+                                                <div>
+                                                    <div className="mt-2 rounded-md text-orange-800 hover:underline flex"
+                                                        onClick={() => setToggleCommentReports(!toggleCommentReports)}>Show/hide reports</div>
+                                                    <div className={`bg-orange-200 ${toggleCommentReports === false ? "hidden" : ""}`}>
+                                                        {props.commentReports.map((cr) => (
+                                                            <li className="ml-4">{cr.reason}</li>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                :
+                                                <div></div>
+                                            }
+                                        </div>
+                                        <div className="mt-4">Reply</div>
+                                        <input type="text" className="blogSearch w-full" onKeyDown={(e) => { if (e.key === 'Enter') { addComment(props.id) } }}
+                                            onChange={(e) => (setNewComments(newComments.set(props.id, e.target.value)))}></input>
 
                                     </div>
                                 }
 
                             </div>
-                            <div className=" p-2 rounded-md text-pink-800 hover:underline"
-                                onClick={() => setToggleShow(!toggleShow)}>Show below</div>
+                            <div className="p-2 rounded-md text-pink-800 hover:underline"
+                                onClick={() => setToggleShow(!toggleShow)}>Show/hide replies</div>
                             <div className="flex flex-row">
                                 <div className="w-10 flex-none"></div>
                                 <div className="flex-1">
@@ -712,7 +727,8 @@ export default function BlogPost() {
                                                 content={c.content}
                                                 hide={c.hide}
                                                 toggleShow={toggleShow}
-                                                page={c.page}>
+                                                page={c.page}
+                                                commentReports={c.CommentReport}>
                                             </NestedComment>
                                         </div>
                                     ))}
@@ -862,25 +878,43 @@ export default function BlogPost() {
                     ))}
                 </div>
             </div>
-            <div className="ratings p-4 border-2 flex flex-row items-center">
-                <button className="rateButton upvote blogRatings"
-                    onClick={(e) => setTempUpvote(!upvote)}>
-                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" className="fill-black">
-                        <path d="M440-160v-487L216-423l-56-57 320-320 320 320-56 57-224-224v487h-80Z" />
-                    </svg>
-                </button>
-                <div className="ml-2 mr-2">{Number(ratingNum)}</div>
-                <button className="rateButton downvote blogRatings"
-                    onClick={(e) => setTempDownvote(!downvote)}>
-                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" className="fill-black">
-                        <path d="M440-800v487L216-537l-56 57 320 320 320-320-56-57-224 224v-487h-80Z" />
-                    </svg>
-                </button>
-                <div className="flex-1"></div>
+            <div className="p-4 border-2">
+                <div className="ratings  flex flex-row items-center">
+                    <button className="rateButton upvote blogRatings"
+                        onClick={(e) => setTempUpvote(!upvote)}>
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" className="fill-black">
+                            <path d="M440-160v-487L216-423l-56-57 320-320 320 320-56 57-224-224v487h-80Z" />
+                        </svg>
+                    </button>
+                    <div className="ml-2 mr-2">{Number(ratingNum)}</div>
+                    <button className="rateButton downvote blogRatings"
+                        onClick={(e) => setTempDownvote(!downvote)}>
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" className="fill-black">
+                            <path d="M440-800v487L216-537l-56 57 320 320 320-320-56-57-224 224v-487h-80Z" />
+                        </svg>
+                    </button>
+                    <div className="flex-1"></div>
+                    <div>
+                        {isAdmin ?
+                            <button className={`${blog.hide === true ? "bg-orange-300" : "bg-orange-500"} text-white p-1 rounded-md`}
+                                onClick={() => hideBlogPost()}>{`ADMIN: ${blog.hide === true ? "un" : ""}hide post`}</button>
+                            :
+                            <div></div>
+                        }
+                    </div>
+                </div>
                 <div>
-                    {isAdmin ?
-                        <button className={`${blog.hide === true ? "bg-orange-300" : "bg-orange-500"} text-white p-1 rounded-md`}
-                            onClick={() => hideBlogPost()}>{`ADMIN: ${blog.hide === true ? "un" : ""}hide post`}</button>
+                    {(isAdmin || authorMatch) && blog.BlogReport.length > 0
+                        ?
+                        <div>
+                            <div className="mt-4 rounded-md text-orange-800 hover:underline flex"
+                                onClick={() => setToggleReports(!toggleReports)}>Show/hide reports</div>
+                            <div className={`bg-orange-200 ${toggleReports === false ? "hidden" : ""}`}>
+                                {blog.BlogReport.map((br) => (
+                                    <li className="ml-4">{br.reason}</li>
+                                ))}
+                            </div>
+                        </div>
                         :
                         <div></div>
                     }
@@ -922,7 +956,8 @@ export default function BlogPost() {
                                 content={c.content}
                                 hide={c.hide}
                                 toggleShow={true}
-                                page={c.page}>
+                                page={c.page}
+                                commentReports={c.CommentReport}>
                             </NestedComment>
                         </div>
                     ))}
