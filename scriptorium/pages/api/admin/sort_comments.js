@@ -16,10 +16,10 @@ export default async function handler(req, res){
                 page = 1;
             }
             try{
-                const c = await prisma.comment.findMany({orderBy:{flags: 'desc'}});
+                const c = await prisma.comment.findMany({orderBy:{flags: 'desc'}, include:{blog: true}});
                 
                 const c2 = paginateArray(c, pageSize, page);
-                res.status(201).json({comments: c2.map(cc => ({id: cc.id, content: cc.content, flags: cc.flags}))});
+                res.status(201).json({comments: c2.map(cc => ({id: cc.id, content: cc.content, flags: cc.flags, blogID: cc.blogID}))});
             }catch(error){
                 return res.status(503).json({error:'error'});
             }
