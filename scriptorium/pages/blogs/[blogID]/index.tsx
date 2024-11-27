@@ -414,40 +414,42 @@ export default function BlogPost() {
         if (!loggedIn) {
             alert("please log in");
         }
-        const filteredRatings = commentRatings.filter((c) => c.commentID === id);
-        let attemptedChange;
-        if (filteredRatings.length > 0) {
-            const item = filteredRatings[0];
+        else {
+            const filteredRatings = commentRatings.filter((c) => c.commentID === id);
+            let attemptedChange;
+            if (filteredRatings.length > 0) {
+                const item = filteredRatings[0];
 
-            attemptedChange = !item.upvote;
+                attemptedChange = !item.upvote;
 
-            if (attemptedChange == true && item.downvote === true) {
-                return;
+                if (attemptedChange == true && item.downvote === true) {
+                    return;
+                }
+
+            }
+            else {
+                attemptedChange = true;
             }
 
-        }
-        else {
-            attemptedChange = true;
-        }
+            const response = await fetch(`/api/user/blogs/${numID}/comments/${id}`,
+                {
+                    method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` },
+                    body: JSON.stringify({
+                        "upvote": attemptedChange,
+                        "downvote": false
+                    }),
+                }
+            );
 
-        const response = await fetch(`/api/user/blogs/${numID}/comments/${id}`,
-            {
-                method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` },
-                body: JSON.stringify({
-                    "upvote": attemptedChange,
-                    "downvote": false
-                }),
+            if (response.ok) {
+                fetchComments();
+                fetchCommentsAll();
+                fetchCommentRatings();
             }
-        );
-
-        if (response.ok) {
-            fetchComments();
-            fetchCommentsAll();
-            fetchCommentRatings();
-        }
-        else {
-            const data = await response.json();
-            alert(data.error);
+            else {
+                const data = await response.json();
+                alert(data.error);
+            }
         }
     }
 
@@ -457,40 +459,42 @@ export default function BlogPost() {
         if (!loggedIn) {
             alert("please log in");
         }
-        const filteredRatings = commentRatings.filter((c) => c.commentID === id);
-        let attemptedChange;
-        if (filteredRatings.length > 0) {
-            const item = filteredRatings[0];
+        else {
+            const filteredRatings = commentRatings.filter((c) => c.commentID === id);
+            let attemptedChange;
+            if (filteredRatings.length > 0) {
+                const item = filteredRatings[0];
 
-            attemptedChange = !item.downvote;
+                attemptedChange = !item.downvote;
 
-            if (attemptedChange == true && item.upvote === true) {
-                return;
+                if (attemptedChange == true && item.upvote === true) {
+                    return;
+                }
+
+            }
+            else {
+                attemptedChange = true;
             }
 
-        }
-        else {
-            attemptedChange = true;
-        }
+            const response = await fetch(`/api/user/blogs/${numID}/comments/${id}`,
+                {
+                    method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` },
+                    body: JSON.stringify({
+                        "upvote": false,
+                        "downvote": attemptedChange
+                    }),
+                }
+            );
 
-        const response = await fetch(`/api/user/blogs/${numID}/comments/${id}`,
-            {
-                method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` },
-                body: JSON.stringify({
-                    "upvote": false,
-                    "downvote": attemptedChange
-                }),
+            if (response.ok) {
+                fetchComments();
+                fetchCommentsAll();
+                fetchCommentRatings();
             }
-        );
-
-        if (response.ok) {
-            fetchComments();
-            fetchCommentsAll();
-            fetchCommentRatings();
-        }
-        else {
-            const data = await response.json();
-            alert(data.error);
+            else {
+                const data = await response.json();
+                alert(data.error);
+            }
         }
     }
 
@@ -894,6 +898,7 @@ export default function BlogPost() {
                             <path d="M440-800v487L216-537l-56 57 320 320 320-320-56-57-224 224v-487h-80Z" />
                         </svg>
                     </button>
+                    <div className="p-1 rounded-md ml-2 text-orange-600">{blog.hide === true ? "hidden" : ""}</div>
                     <div className="flex-1"></div>
                     <div>
                         {isAdmin ?
@@ -928,7 +933,7 @@ export default function BlogPost() {
                 <div className="flex flex-row">
                     <div>Sort by:</div>
                     <div className="ml-2">
-                        <select id="sort-filter" onChange={(e) => {
+                        <select id="sort-filter" className="border-2 border-green-400" onChange={(e) => {
                             setSortMethod(e.target.value);
                         }}>
                             <option>valued</option>

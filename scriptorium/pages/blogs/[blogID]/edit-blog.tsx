@@ -253,7 +253,12 @@ export default function EditBlog() {
                                 className="blogSearch mb-2"
                                 value={tagFilter}
                                 placeholder="Find tags"
-                                onChange={(e) => (setTagFilter(e.target.value))} />
+                                onChange={(e) => { setTagFilter(e.target.value) }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                    }
+                                }} />
                             <div className="flex flex-row gap-2 flex-wrap">
                                 {tags.map((t) => (
                                     <div key={t.id} className="tagItem flex flex-row gap-2">

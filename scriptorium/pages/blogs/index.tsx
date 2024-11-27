@@ -272,7 +272,14 @@ export default function Blogs() {
                                 className="blogSearch mb-2"
                                 value={tagFilter}
                                 placeholder="Find tags"
-                                onChange={(e) => (setTagFilter(e.target.value))} />
+                                onChange={(e) => {
+                                    setTagFilter(e.target.value);
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                    }
+                                }} />
                             <div className="flex flex-row gap-2 flex-wrap">
                                 {tags.map((t) => (
                                     <div key={t.id} className="tagItem flex flex-row gap-2">
@@ -305,10 +312,10 @@ export default function Blogs() {
                             <div className="text-red-600">{newTemplateError}</div>
                         </div>
 
-                        <div className="flex flex-row">
+                        <div className="flex flex-row mt-2">
                             <div>Sort by:</div>
                             <div className="ml-2">
-                                <select id="sort-filter" onChange={(e) => setSortMethod(e.target.value)}>
+                                <select id="sort-filter" className="border-2 border-green-400" onChange={(e) => setSortMethod(e.target.value)}>
                                     <option>valued</option>
                                     <option>recent</option>
                                     <option>controversial</option>
