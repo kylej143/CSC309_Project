@@ -30,11 +30,6 @@ interface NestedComment extends Comment {
     page: number;
 }
 
-interface CommentRatingStorage {
-    upvote: boolean;
-    downvote: boolean;
-}
-
 export default function BlogPost() {
 
     const [blog, setBlog] = useState<Blog>(defaultBlog);
@@ -75,14 +70,20 @@ export default function BlogPost() {
     const fetchBlog = async () => {
         const loggedIn = localStorage.getItem("accessToken");
         try {
-            await fetch(`/api/user/blogs/${numID}`, {
+            const response = await fetch(`/api/user/blogs/${numID}`, {
                 method: "GET", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` }
             })
-                .then((response) => response.json())
-                .then((b: Blog) => {
-                    setBlog(b);
-                    setRatingNum(b.up - b.down);
-                });
+
+            if (response.ok) {
+                await response.json()
+                    .then((b: Blog) => {
+                        setBlog(b);
+                        setRatingNum(b.up - b.down);
+                    });
+            }
+            else {
+                router.push(`/blogs`);
+            }
         }
         catch (error) {
             router.push(`/blogs`);
