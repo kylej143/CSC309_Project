@@ -19,6 +19,14 @@ export default function Blogs() {
     const [newTagField, setNewTagField] = useState("");
     const [newTagID, setNewTagID] = useState(-1);
 
+    // code templates
+    const [codeTemplates, setCodeTemplates] = useState<{ id: number, link: string }[]>([]);
+
+    // adding new code template
+    const [newCodeTemplateField, setNewCodeTemplateField] = useState("");
+    const [newCodeTemplateID, setNewCodeTemplateID] = useState(-1);
+    const [newTemplateError, setNewTemplateError] = useState("");
+
     const router = useRouter();
 
     // check if the user is logged in 
@@ -36,13 +44,15 @@ export default function Blogs() {
         // theoretically should not have to encounter login error, since checkLogggedIn is executed earlier
         if (loggedIn) {
             const stringTags: string[] = selectedTags.map((t) => t.tag);
+            const numTemplates: number[] = codeTemplates.map((c) => c.id);
             const response = await fetch('/api/user/blogs',
                 {
                     method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${loggedIn}` },
                     body: JSON.stringify({
                         title: titleCreate,
                         content: contentCreate,
-                        tags: stringTags
+                        tags: stringTags,
+                        templates: numTemplates
                     }),
                 }
             );
@@ -105,6 +115,35 @@ export default function Blogs() {
             setNewTagID(newTagID - 1);
             setNewTagField("");
             setTags(addTags(tags, tagToAdd));
+        }
+    }
+
+    function addCodeTemplates(templateArray: { id: number, link: string }[], newTemplate: { id: number, link: string }) {
+        return templateArray.concat([newTemplate]);
+    }
+
+    // add a new codetemplate to the blog
+    const addNewCodeTemplate = (e: React.KeyboardEvent<HTMLInputElement>) => {
+
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const trimCodeTemplates = /.*code_templates\//
+            const templateNum = Number(newCodeTemplateField.replace(trimCodeTemplates, ""));
+            if (isNaN(templateNum)) {
+                setNewTemplateError("Invalid link format");
+                setNewCodeTemplateField("");
+            }
+            else {
+                setNewCodeTemplateID(newCodeTemplateID - 1);
+                const templateToAdd = {
+                    id: templateNum,
+                    link: newCodeTemplateField,
+                }
+                setCodeTemplates(addCodeTemplates(codeTemplates, templateToAdd));
+                setNewCodeTemplateField("");
+                setNewTemplateError("");
+            }
+
         }
     }
 
@@ -175,6 +214,25 @@ export default function Blogs() {
                             </div>
                         </div>
 
+                        <div>Code Templates</div>
+                        <div className="border-2 p-4 bg-gray-100 ">
+                            <div className=" gap-2 flex-wrap">
+                                {codeTemplates.map((c) => (
+                                    <div key={`template${c}`} className="tagItem flex flex-row gap-2">
+                                        <div>{c.link}</div>
+                                    </div>
+                                ))}
+                            </div>
+                            <input type="text"
+                                id="newCodeTemplateItem"
+                                className="blogSearch mb-2 w-full"
+                                value={newCodeTemplateField}
+                                placeholder="Add a code template by link"
+                                onKeyDown={addNewCodeTemplate}
+                                onChange={(e) => (setNewCodeTemplateField(e.target.value))}>
+                            </input>
+                            <div className="text-red-600">{newTemplateError}</div>
+                        </div>
                         <button className="bg-pink-300 mt-2" type="submit" >Create Blog</button>
                     </form>
                 </div>

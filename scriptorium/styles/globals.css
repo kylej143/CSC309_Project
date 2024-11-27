@@ -40,6 +40,14 @@ body {
   @apply shadow-md shadow-gray-400;
 }
 
+.flatItem {
+  @apply border-2 p-1 rounded-md bg-white;
+}
+
+.flatItem:hover {
+  @apply shadow-md shadow-gray-400;
+}
+
 #newTagItem {
   @apply border-gray-500
 }
@@ -63,3 +71,29 @@ body {
 .blogSearch {
   @apply border-2;
 }
+
+/* blog - upvotes and downvotes */
+
+.rateButton {
+  @apply border-2 rounded-md
+}
+
+.rateButton.upvote:hover {
+  @apply bg-green-400;
+}
+
+.rateButton.downvote:hover {
+  @apply bg-gray-400;
+}
+
+.rateButton.upvote.rateSelected {
+  @apply bg-green-400;
+}
+
+.rateButton.downvote.rateSelected {
+  @apply bg-gray-400;
+}
+
+/* #commentUpvote21 {
+  @apply bg-blue-200;
+} */

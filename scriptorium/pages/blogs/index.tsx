@@ -13,7 +13,7 @@ export interface Blog {
     userID: number;
     user: { id: number; username: string; avatar: number };
     tags: { id: number; tag: string }[];
-    templates: [];
+    templates: { id: number, title: string, explanation: string, code: string, private: boolean, forkID: number, userID: number }[];
     BlogReport: [];
 }
 
@@ -53,10 +53,10 @@ export default function Blogs() {
     const [rm, sm] = useState(false);
     const [rr, sr] = useState("");
 
-    const op = (blogId: number) => {ss(blogId); sm(true);};
-    const cl = () => {ss(null); sr(""); sm(false);};
+    const op = (blogId: number) => { ss(blogId); sm(true); };
+    const cl = () => { ss(null); sr(""); sm(false); };
 
-    const [blogs, setBlogs] = useState([]);
+    const [blogs, setBlogs] = useState<Blog[]>([]);
 
     // title and content
     const [titleSearch, setTitleSearch] = useState("");
@@ -67,6 +67,18 @@ export default function Blogs() {
     const [tags, setTags] = useState<{ id: number, tag: string }[]>([]); // tags that are showing
     const [selectedTags, setSelectedTags] = useState<{ id: number, tag: string }[]>([]); // tags that are selected 
     const [tagFilter, setTagFilter] = useState("");
+
+    // code templates
+    const [codeTemplates, setCodeTemplates] = useState<{ id: number, link: string }[]>([]);
+    const [codeTemplateField, setCodeTemplateField] = useState<string>("");
+    const [newCodeTemplateID, setNewCodeTemplateID] = useState(-1);
+    const [newTemplateError, setNewTemplateError] = useState("");
+
+    // sort
+    const [sortMethod, setSortMethod] = useState("valued");
+
+    // page
+    const [page, setPage] = useState(1);
 
     // search
     const [goSearch, setGoSearch] = useState<boolean>(false);
@@ -87,6 +99,12 @@ export default function Blogs() {
                 searchRequest.append("tags", t.tag)
             ));
         }
+        if (codeTemplates.length !== 0) {
+            codeTemplates.map((c) => (
+                searchRequest.append("templates", c.id.toString())
+            ));
+        }
+        searchRequest.append("sort", sortMethod);
         const loggedIn = localStorage.getItem("accessToken");
         const response = await fetch(`/api/user/blogs/?${searchRequest.toString()}`,
             {
@@ -134,20 +152,51 @@ export default function Blogs() {
 
     const report = async () => {
         const li = localStorage.getItem("accessToken");
-        try{
-            const r = await fetch(`/api/user/blog_report`, {method: "POST", headers: {"Content-Type": "application/json", Authorization: `Bearer ${li}`},
-                body: JSON.stringify({blogID: sb, reason: rr})});
+        try {
+            const r = await fetch(`/api/user/blog_report`, {
+                method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${li}` },
+                body: JSON.stringify({ blogID: sb, reason: rr })
+            });
 
-            if(r.ok){
+            if (r.ok) {
                 alert("You successfully reported the blog.");
                 cl();
-            }else{
+            } else {
                 alert("error");
             }
-        }catch(error){
+        } catch (error) {
             alert("error");
         }
     };
+
+    function addCodeTemplates(templateArray: { id: number, link: string }[], newTemplate: { id: number, link: string }) {
+        return templateArray.concat([newTemplate]);
+    }
+
+    // add a new codetemplate to the blog
+    const addNewCodeTemplate = (e: React.KeyboardEvent<HTMLInputElement>) => {
+
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const trimCodeTemplates = /.*code_templates\//
+            const templateNum = Number(codeTemplateField.replace(trimCodeTemplates, ""));
+            if (isNaN(templateNum)) {
+                setNewTemplateError("Invalid link format");
+                setCodeTemplateField("");
+            }
+            else {
+                setNewCodeTemplateID(newCodeTemplateID - 1);
+                const templateToAdd = {
+                    id: templateNum,
+                    link: codeTemplateField,
+                }
+                setCodeTemplates(addCodeTemplates(codeTemplates, templateToAdd));
+                setCodeTemplateField("");
+                setNewTemplateError("");
+            }
+
+        }
+    }
 
     useEffect(() => {
         fetchBlogs();
@@ -205,41 +254,107 @@ export default function Blogs() {
                             </div>
                         </div>
 
-                        <button className="bg-pink-300" type="submit" >Search</button>
+                        <div className="border-2 p-4 bg-gray-100 ">
+                            <div className=" gap-2 flex-wrap">
+                                {codeTemplates.map((c) => (
+                                    <div key={`template${c}`} className="flatItem flex flex-row gap-2">
+                                        <div>{c.link}</div>
+                                    </div>
+                                ))}
+                            </div>
+                            <input type="text"
+                                id="newCodeTemplateItem"
+                                className="blogSearch mb-2 w-full"
+                                value={codeTemplateField}
+                                placeholder="Search for a code template by link, and enter"
+                                onKeyDown={addNewCodeTemplate}
+                                onChange={(e) => (setCodeTemplateField(e.target.value))}>
+                            </input>
+                            <div className="text-red-600">{newTemplateError}</div>
+                        </div>
+
+                        <div className="flex flex-row">
+                            <div>Sort by:</div>
+                            <div className="ml-2">
+                                <select id="sort-filter" onChange={(e) => setSortMethod(e.target.value)}>
+                                    <option>valued</option>
+                                    <option>recent</option>
+                                    <option>controversial</option>
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <button className="bg-pink-300 p-1 mt-4" type="submit" >Search</button>
+
                     </form>
                 </div>
 
                 <h1 className="text-pink-700 font-bold mb-2">{blogs.length} blogs found </h1>
-                <div className="blogList grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 col-span-2 gap-4">
-                    {blogs.map((blog: {
-                        id: number; title: string; content: string; userID: number;
-                        user: { id: number; username: string; avatar: number }; tags: { id: number; tag: string }[]
-                    }) => (
+                <div className="blogList grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 col-span-2 gap-4">
+                    {blogs.map((blog) => (
                         <div key={blog.id} className="blogItem" onClick={(e) => router.push(`/blogs/${blog.id}`)}>
-                            <p className="blogItemTitle">{blog.title}</p>
-                            <p className="blogItemContent">{blog.content}</p>
+
+                            <div className="flex flex-row w-full bg-green-100">
+                                <div>
+                                    <p className="blogItemTitle">{blog.title}</p>
+                                    <p className="blogItemContent">{blog.content.length > 75 ? `${blog.content.substring(0, 70)} [...]` : `${blog.content}`}</p>
+                                </div>
+                                <div className="flex-1"></div>
+                                <div className="items-center flex flex-row">
+                                    <div>
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" className="fill-black">
+                                            <path d="M440-160v-487L216-423l-56-57 320-320 320 320-56 57-224-224v487h-80Z" />
+                                        </svg>
+
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" className="fill-black">
+                                            <path d="M440-800v487L216-537l-56 57 320 320 320-320-56-57-224 224v-487h-80Z" />
+                                        </svg>
+                                    </div>
+                                    <div className="text-lg p-2">{blog.up - blog.down}</div>
+                                </div>
+
+                            </div>
+
+
                             <div className="blogTags flex flex-row gap-2">
                                 <p className="font-bold">Tags:</p>
                                 {blog.tags.map((t) => (
                                     <p className="text-neutral-500">{t.tag}</p>
                                 ))}
                             </div>
+
+                            <div>
+                                <p className="font-bold">Code Templates:</p>
+                                {blog.templates.map((t) => (
+                                    <p className="text-neutral-500">{`${t.id}: ${t.title}`}</p>
+                                ))}
+                            </div>
+
                             <div className="flex flex-row">
                                 <div className="flex flex-row gap-2 items-center border-2 p-1 rounded-md bg-gray-200">
-                                    <div className="bg-gray-400 p-1 rounded-md">{blog.user.avatar}</div>
+                                    <img src={`/avatars/avatar${blog.user.avatar}.png`} alt={`${blog.user.avatar}`} />
                                     <div>{blog.user.username}</div>
-                                    </div>
-                                        <button
-                                        className="bg-pink-600 text-white"
-                                        onClick={(e) => {e.stopPropagation(); op(blog.id);}}>
-                                        report
-                                    </button>
                                 </div>
                             </div>
-                        ))}
-                    </div>
+
+                            <div className="flex flex-row gap-2 items-center mt-2">
+                                <button
+                                    className="bg-pink-600 text-white p-1 rounded-md"
+                                    onClick={(e) => { e.stopPropagation(); op(blog.id); }}>
+                                    report
+                                </button>
+                                <div className="p-1 rounded-md text-orange-600">{blog.hide === true ? "hidden" : ""}</div>
+                            </div>
+
+                        </div>
+                    ))}
                 </div>
-                {rm && (
+                <div>
+
+                </div>
+            </div>
+            {rm && (
                 <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center">
                     <div className="bg-green p-6 w-full max-w-lg">
                         <h2 className="text-xl font-bold mb-4">report the blog</h2>

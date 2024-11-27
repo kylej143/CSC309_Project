@@ -338,6 +338,45 @@ export default async function handler(req, res) {
                 return res.status(403).json({ error: "Cannot delete post that has been hidden by administrator" });
             }
 
+            // delete associated ratings
+            await prisma.blogRating.deleteMany({
+                where: {
+                    blogID: id,
+                }
+            })
+
+            // delete associated reports
+            await prisma.blogReport.deleteMany({
+                where: {
+                    blogID: id,
+                }
+            })
+
+            // delete associated comment reports
+            await prisma.commentReport.deleteMany({
+                where: {
+                    comment: {
+                        blogID: id,
+                    }
+                }
+            })
+
+            // delete associated comment ratings
+            await prisma.commentRating.deleteMany({
+                where: {
+                    comment: {
+                        blogID: id,
+                    }
+                }
+            })
+
+            // delete associated comments
+            await prisma.comment.deleteMany({
+                where: {
+                    blogID: id,
+                }
+            })
+
             // delete the post
             await prisma.blog.delete({
                 where: {
@@ -354,10 +393,12 @@ export default async function handler(req, res) {
                 }
             })
 
+
+
             return res.status(200).json({ "message": "Blog post deleted" });
         }
         catch (error) {
-            return res.status(403).json({ error: "Could not delete blog post" });
+            return res.status(403).json({ error: error.toString() });
         }
 
     }
